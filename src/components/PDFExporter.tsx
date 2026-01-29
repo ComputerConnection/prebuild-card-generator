@@ -1,26 +1,32 @@
 import { useState } from 'react';
-import { PrebuildConfig, CardSize, CARD_SIZES } from '../types';
+import { jsPDF } from 'jspdf';
+import { PrebuildConfig, CardSize, CARD_SIZES, BrandIcon } from '../types';
 import { generatePDF, generateShelfTagMultiUp, generatePriceCardMultiUp, downloadPDF } from '../utils/pdfGenerator';
+import { EmailDialog } from './EmailDialog';
 
 interface PDFExporterProps {
   config: PrebuildConfig;
   cardSize: CardSize;
   onCardSizeChange: (size: CardSize) => void;
+  brandIcons: BrandIcon[];
 }
 
 const ALL_SIZES: CardSize[] = ['shelf', 'price', 'poster'];
 
-export function PDFExporter({ config, cardSize, onCardSizeChange }: PDFExporterProps) {
+export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: PDFExporterProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const [isGeneratingShelfMultiUp, setIsGeneratingShelfMultiUp] = useState(false);
   const [isGeneratingPriceMultiUp, setIsGeneratingPriceMultiUp] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [currentPdf, setCurrentPdf] = useState<jsPDF | null>(null);
+  const [isPreparingEmail, setIsPreparingEmail] = useState(false);
 
   const handleExport = async () => {
     setIsGenerating(true);
     try {
-      const doc = await generatePDF(config, cardSize);
+      const doc = await generatePDF(config, cardSize, brandIcons);
       const filename = `${config.modelName || 'PC-Build'}-${CARD_SIZES[cardSize].name.replace(/\s+/g, '-')}.pdf`;
       downloadPDF(doc, filename);
     } catch (error) {
@@ -40,7 +46,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange }: PDFExporterP
         const size = ALL_SIZES[i];
         setBatchProgress(i + 1);
 
-        const doc = await generatePDF(config, size);
+        const doc = await generatePDF(config, size, brandIcons);
         const filename = `${config.modelName || 'PC-Build'}-${CARD_SIZES[size].name.replace(/\s+/g, '-')}.pdf`;
         downloadPDF(doc, filename);
 
@@ -61,7 +67,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange }: PDFExporterP
   const handleExportShelfMultiUp = async () => {
     setIsGeneratingShelfMultiUp(true);
     try {
-      const doc = await generateShelfTagMultiUp(config, true);
+      const doc = await generateShelfTagMultiUp(config, true, brandIcons);
       const filename = `${config.modelName || 'PC-Build'}-Shelf-Tags-12up.pdf`;
       downloadPDF(doc, filename);
     } catch (error) {
@@ -75,7 +81,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange }: PDFExporterP
   const handleExportPriceMultiUp = async () => {
     setIsGeneratingPriceMultiUp(true);
     try {
-      const doc = await generatePriceCardMultiUp(config, true);
+      const doc = await generatePriceCardMultiUp(config, true, brandIcons);
       const filename = `${config.modelName || 'PC-Build'}-Price-Cards-2up.pdf`;
       downloadPDF(doc, filename);
     } catch (error) {
@@ -86,7 +92,21 @@ export function PDFExporter({ config, cardSize, onCardSizeChange }: PDFExporterP
     }
   };
 
-  const isDisabled = isGenerating || isGeneratingAll || isGeneratingShelfMultiUp || isGeneratingPriceMultiUp;
+  const isDisabled = isGenerating || isGeneratingAll || isGeneratingShelfMultiUp || isGeneratingPriceMultiUp || isPreparingEmail;
+
+  const handlePrepareEmail = async () => {
+    setIsPreparingEmail(true);
+    try {
+      const doc = await generatePDF(config, cardSize, brandIcons);
+      setCurrentPdf(doc);
+      setEmailDialogOpen(true);
+    } catch (error) {
+      console.error('Failed to generate PDF for email:', error);
+      alert('Failed to prepare PDF. Please try again.');
+    } finally {
+      setIsPreparingEmail(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -346,7 +366,69 @@ export function PDFExporter({ config, cardSize, onCardSizeChange }: PDFExporterP
         <p className="text-xs text-gray-500 text-center">
           Downloads Shelf Tag, Price Card, and Poster
         </p>
+
+        {/* Email Button */}
+        <button
+          onClick={handlePrepareEmail}
+          disabled={isDisabled}
+          className="w-full px-4 py-3 bg-orange-500 text-white font-medium rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+        >
+          {isPreparingEmail ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Preparing...
+            </>
+          ) : (
+            <>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              Email {CARD_SIZES[cardSize].name}
+            </>
+          )}
+        </button>
       </div>
+
+      {/* Email Dialog */}
+      <EmailDialog
+        isOpen={emailDialogOpen}
+        onClose={() => {
+          setEmailDialogOpen(false);
+          setCurrentPdf(null);
+        }}
+        config={config}
+        pdfDoc={currentPdf}
+        cardSize={CARD_SIZES[cardSize].name}
+      />
     </div>
   );
 }

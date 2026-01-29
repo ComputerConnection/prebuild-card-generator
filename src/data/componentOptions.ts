@@ -184,6 +184,37 @@ export const defaultComponents = {
   cooling: '',
 };
 
+export const defaultComponentPrices = {
+  cpu: '',
+  gpu: '',
+  ram: '',
+  storage: '',
+  motherboard: '',
+  psu: '',
+  case: '',
+  cooling: '',
+};
+
+export const saleBadgeOptions = [
+  'SALE',
+  'HOT DEAL',
+  'CLEARANCE',
+  'LIMITED TIME',
+  'PRICE DROP',
+  'SPECIAL OFFER',
+];
+
+export const financingTermOptions = [6, 12, 18, 24, 36, 48, 60];
+
+export const defaultVisualSettings = {
+  backgroundPattern: 'solid' as const,
+  cardTemplate: 'default' as const,
+  fontFamily: 'helvetica' as const,
+  showQrCode: false,
+  qrCodeUrl: '',
+  productImage: null as string | null,
+};
+
 export const defaultConfig = {
   modelName: '',
   price: '',
@@ -199,4 +230,26 @@ export const defaultConfig = {
   description: '',
   colorTheme: 'minimal' as const,
   customColors: { ...THEME_PRESETS.minimal },
+  // Component prices
+  componentPrices: { ...defaultComponentPrices },
+  showComponentPrices: false,
+  // Inventory
+  stockStatus: '' as const,
+  stockQuantity: '',
+  // Sale info
+  saleInfo: {
+    enabled: false,
+    originalPrice: '',
+    badgeText: 'SALE',
+  },
+  // Financing
+  financingInfo: {
+    enabled: false,
+    months: 24,
+    apr: 0,
+  },
+  // Visual settings
+  visualSettings: { ...defaultVisualSettings },
+  // Condition
+  condition: '' as const,
 };

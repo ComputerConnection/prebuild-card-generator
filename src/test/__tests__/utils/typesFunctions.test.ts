@@ -44,7 +44,14 @@ function createTestConfig(overrides: Partial<PrebuildConfig> = {}): PrebuildConf
     colorTheme: 'gaming',
     customColors: { primary: '#ff0000', accent: '#000000', priceColor: '#ff0000' },
     componentPrices: {
-      cpu: 0, gpu: 0, ram: 0, storage: 0, motherboard: 0, psu: 0, case: 0, cooling: 0,
+      cpu: 0,
+      gpu: 0,
+      ram: 0,
+      storage: 0,
+      motherboard: 0,
+      psu: 0,
+      case: 0,
+      cooling: 0,
     },
     showComponentPrices: false,
     stockStatus: null,
@@ -117,7 +124,7 @@ describe('formatPrice', () => {
 
     it('should format prices with decimals', () => {
       expect(formatPrice(99.99)).toBe('$99.99');
-      expect(formatPrice(1499.50)).toBe('$1,499.50');
+      expect(formatPrice(1499.5)).toBe('$1,499.50');
     });
 
     it('should add commas for thousands', () => {
@@ -160,7 +167,7 @@ describe('parsePrice', () => {
 
   it('should parse prices with commas', () => {
     expect(parsePrice('1,000')).toBe(1000);
-    expect(parsePrice('10,000.50')).toBe(10000.50);
+    expect(parsePrice('10,000.50')).toBe(10000.5);
     expect(parsePrice('$1,000,000')).toBe(1000000);
   });
 
@@ -195,12 +202,12 @@ describe('formatPriceForInput', () => {
 
   it('should include decimals when present', () => {
     expect(formatPriceForInput(99.99)).toBe('99.99');
-    expect(formatPriceForInput(1499.50)).toBe('1,499.5');
+    expect(formatPriceForInput(1499.5)).toBe('1,499.5');
   });
 
   it('should not force two decimal places', () => {
-    expect(formatPriceForInput(100.10)).toBe('100.1');
-    expect(formatPriceForInput(100.00)).toBe('100');
+    expect(formatPriceForInput(100.1)).toBe('100.1');
+    expect(formatPriceForInput(100.0)).toBe('100');
   });
 });
 

@@ -66,7 +66,7 @@ export const BrandIconManager = memo(function BrandIconManager() {
 
   // Brands that don't have icons yet
   const missingBrands = KNOWN_BRANDS.filter(
-    brand => !brandIcons.some(icon => icon.name.toLowerCase() === brand.toLowerCase())
+    (brand) => !brandIcons.some((icon) => icon.name.toLowerCase() === brand.toLowerCase())
   );
 
   return (
@@ -113,8 +113,10 @@ export const BrandIconManager = memo(function BrandIconManager() {
                 className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select brand...</option>
-                {missingBrands.map(brand => (
-                  <option key={brand} value={brand}>{brand}</option>
+                {missingBrands.map((brand) => (
+                  <option key={brand} value={brand}>
+                    {brand}
+                  </option>
                 ))}
                 <option value="__custom__">-- Custom --</option>
               </select>
@@ -179,8 +181,19 @@ export const BrandIconManager = memo(function BrandIconManager() {
                     className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                     aria-label={`Remove ${icon.name} icon`}
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -189,9 +202,7 @@ export const BrandIconManager = memo(function BrandIconManager() {
           )}
 
           {brandIcons.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">
-              No brand icons uploaded yet
-            </p>
+            <p className="text-sm text-gray-400 text-center py-4">No brand icons uploaded yet</p>
           )}
         </div>
       )}

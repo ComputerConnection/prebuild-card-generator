@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { LocalStorageAdapter, createVersionedStorage, migrateLegacyData } from '../../../lib/storage';
+import {
+  LocalStorageAdapter,
+  createVersionedStorage,
+  migrateLegacyData,
+} from '../../../lib/storage';
 
 describe('LocalStorageAdapter', () => {
   let adapter: LocalStorageAdapter;
@@ -119,13 +123,7 @@ describe('createVersionedStorage', () => {
       timestamp: Date.now(),
     });
 
-    const storage = createVersionedStorage(
-      adapter,
-      'config',
-      1,
-      { name: '', version: 0 },
-      migrate
-    );
+    const storage = createVersionedStorage(adapter, 'config', 1, { name: '', version: 0 }, migrate);
 
     const result = storage.get();
     expect(migrate).toHaveBeenCalledWith({ oldName: 'legacy' }, 0);

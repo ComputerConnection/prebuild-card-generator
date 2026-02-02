@@ -69,7 +69,9 @@ describe('InventoryStatusForm', () => {
       const conditionSelect = getSelectByLabel('Condition');
       expect(conditionSelect.querySelector('option[value=""]')).toBeInTheDocument();
       expect(conditionSelect.querySelector('option[value="new"]')).toBeInTheDocument();
-      expect(conditionSelect.querySelector('option[value="certified_preowned"]')).toBeInTheDocument();
+      expect(
+        conditionSelect.querySelector('option[value="certified_preowned"]')
+      ).toBeInTheDocument();
       expect(conditionSelect.querySelector('option[value="open_box"]')).toBeInTheDocument();
       expect(conditionSelect.querySelector('option[value="refurbished"]')).toBeInTheDocument();
       expect(conditionSelect.querySelector('option[value="preowned"]')).toBeInTheDocument();

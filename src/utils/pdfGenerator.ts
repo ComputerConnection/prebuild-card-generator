@@ -1,5 +1,19 @@
 import { jsPDF } from 'jspdf';
-import { PrebuildConfig, CardSize, CARD_SIZES, COMPONENT_LABELS, ComponentCategory, getThemeColors, BrandIcon, STOCK_STATUS_CONFIG, CONDITION_CONFIG, calculateMonthlyPayment, calculateDiscountPercent, formatPrice, ThemeColors } from '../types';
+import {
+  PrebuildConfig,
+  CardSize,
+  CARD_SIZES,
+  COMPONENT_LABELS,
+  ComponentCategory,
+  getThemeColors,
+  BrandIcon,
+  STOCK_STATUS_CONFIG,
+  CONDITION_CONFIG,
+  calculateMonthlyPayment,
+  calculateDiscountPercent,
+  formatPrice,
+  ThemeColors,
+} from '../types';
 import { findBrandIcon } from './brandDetection';
 import { generateQRCodeDataUrl } from './qrcode';
 import { generateBarcodeDataUrl, isValidBarcode } from './barcode';
@@ -104,14 +118,23 @@ function addImageToPdf(
       resolve({ width, height, success: true });
     };
     img.onerror = (event) => {
-      logger.warn('PDFGenerator', `Failed to load ${imageType}`, { src: src.substring(0, 100), event });
+      logger.warn('PDFGenerator', `Failed to load ${imageType}`, {
+        src: src.substring(0, 100),
+        event,
+      });
       resolve({ width: 0, height: 0, success: false });
     };
     img.src = src;
   });
 }
 
-async function addQrCodeToPdf(doc: jsPDF, url: string, x: number, y: number, size: number): Promise<boolean> {
+async function addQrCodeToPdf(
+  doc: jsPDF,
+  url: string,
+  x: number,
+  y: number,
+  size: number
+): Promise<boolean> {
   if (!url) {
     logger.debug('PDFGenerator', 'Skipping QR code - no URL provided');
     return false;
@@ -130,7 +153,14 @@ async function addQrCodeToPdf(doc: jsPDF, url: string, x: number, y: number, siz
   }
 }
 
-async function addBarcodeToPdf(doc: jsPDF, sku: string, x: number, y: number, width: number, height: number): Promise<boolean> {
+async function addBarcodeToPdf(
+  doc: jsPDF,
+  sku: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): Promise<boolean> {
   if (!sku) {
     logger.debug('PDFGenerator', 'Skipping barcode - no SKU provided');
     return false;
@@ -199,7 +229,11 @@ function drawBadge(
 /**
  * Build badge array from config
  */
-function buildBadgesFromConfig(config: PrebuildConfig, colors: ThemeColors, includeStock: boolean = false): Badge[] {
+function buildBadgesFromConfig(
+  config: PrebuildConfig,
+  colors: ThemeColors,
+  includeStock: boolean = false
+): Badge[] {
   const badges: Badge[] = [];
 
   if (config.condition) {
@@ -210,9 +244,10 @@ function buildBadgesFromConfig(config: PrebuildConfig, colors: ThemeColors, incl
     badges.push({ text: config.buildTier, bg: hexToRgb(colors.primary), fg: [255, 255, 255] });
   }
   if (config.saleInfo?.enabled) {
-    const saleText = config.saleInfo.originalPrice > 0 && config.price > 0
-      ? `${config.saleInfo.badgeText} ${calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% OFF`
-      : config.saleInfo.badgeText;
+    const saleText =
+      config.saleInfo.originalPrice > 0 && config.price > 0
+        ? `${config.saleInfo.badgeText} ${calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% OFF`
+        : config.saleInfo.badgeText;
     badges.push({ text: saleText, bg: [220, 38, 38], fg: [255, 255, 255] });
   }
   if (includeStock && config.stockStatus) {
@@ -238,13 +273,25 @@ function renderBadgeRow(
   const { fontSize, paddingX, paddingY, radius, spacing } = options;
 
   doc.setFontSize(fontSize);
-  const totalWidth = badges.reduce((sum, b) => sum + doc.getTextWidth(b.text) + paddingX * 2, 0)
-    + (badges.length - 1) * spacing;
+  const totalWidth =
+    badges.reduce((sum, b) => sum + doc.getTextWidth(b.text) + paddingX * 2, 0) +
+    (badges.length - 1) * spacing;
 
   let bx = centerX - totalWidth / 2;
 
   for (const badge of badges) {
-    const bw = drawBadge(doc, badge.text, bx, y, badge.bg, badge.fg, fontSize, paddingX, paddingY, radius);
+    const bw = drawBadge(
+      doc,
+      badge.text,
+      bx,
+      y,
+      badge.bg,
+      badge.fg,
+      fontSize,
+      paddingX,
+      paddingY,
+      radius
+    );
     bx += bw + spacing;
   }
 
@@ -313,7 +360,12 @@ function renderPriceSection(
     doc.text(origPriceStr, origX, textY);
     doc.setLineWidth(0.015);
     doc.setDrawColor(150, 150, 150);
-    doc.line(origX - 0.02, textY - strikeFontSize * 0.004, origX + origW + 0.02, textY - strikeFontSize * 0.004);
+    doc.line(
+      origX - 0.02,
+      textY - strikeFontSize * 0.004,
+      origX + origW + 0.02,
+      textY - strikeFontSize * 0.004
+    );
     currentY += strikeFontSize * 0.012 + 0.04;
   }
 
@@ -347,7 +399,11 @@ function renderFinancingInfo(
 ): number {
   if (!config.financingInfo?.enabled || config.price <= 0) return y;
 
-  const monthly = calculateMonthlyPayment(config.price, config.financingInfo.months, config.financingInfo.apr);
+  const monthly = calculateMonthlyPayment(
+    config.price,
+    config.financingInfo.months,
+    config.financingInfo.apr
+  );
   if (!monthly) return y;
 
   doc.setFontSize(fontSize);
@@ -381,7 +437,14 @@ async function renderFooter(
 
   // Barcode
   if (config.sku && isValidBarcode(config.sku)) {
-    await addBarcodeToPdf(doc, config.sku, barcodeX, footerY - barcodeHeight - 0.02, barcodeWidth, barcodeHeight);
+    await addBarcodeToPdf(
+      doc,
+      config.sku,
+      barcodeX,
+      footerY - barcodeHeight - 0.02,
+      barcodeWidth,
+      barcodeHeight
+    );
   }
 
   // SKU text
@@ -414,7 +477,15 @@ async function renderSpecLine(
   let textX = x;
 
   if (brandIcon) {
-    await addImageToPdf(doc, brandIcon.image, textX, y - iconSize * 0.15, iconSize, iconSize, false);
+    await addImageToPdf(
+      doc,
+      brandIcon.image,
+      textX,
+      y - iconSize * 0.15,
+      iconSize,
+      iconSize,
+      false
+    );
     textX += iconSize + 0.02;
   }
 
@@ -453,7 +524,7 @@ function renderInfoBar(
     { label: 'OS', value: config.os },
     { label: 'WARRANTY', value: config.warranty },
     { label: 'CONNECTIVITY', value: config.wifi },
-  ].filter(item => item.value);
+  ].filter((item) => item.value);
 
   if (footerInfo.length === 0) return y;
 
@@ -513,7 +584,14 @@ async function drawShelfTagAt(
 
   // Logo
   if (config.storeLogo) {
-    const { height: logoH } = await addImageToPdf(doc, config.storeLogo, offsetX + layout.margin, y, contentWidth, layout.logoMaxHeight);
+    const { height: logoH } = await addImageToPdf(
+      doc,
+      config.storeLogo,
+      offsetX + layout.margin,
+      y,
+      contentWidth,
+      layout.logoMaxHeight
+    );
     y += logoH + layout.spacing.afterLogo;
   }
 
@@ -547,24 +625,48 @@ async function drawShelfTagAt(
   const keySpecs: ComponentCategory[] = ['cpu', 'gpu', 'ram', 'storage'];
   for (const key of keySpecs) {
     y = await renderSpecLine(
-      doc, key, config.components[key], brandIcons,
-      offsetX + layout.margin, y, contentWidth,
-      colors, layout.specs.iconSize, layout.fontSize.specLabel, layout.fontSize.specValue
+      doc,
+      key,
+      config.components[key],
+      brandIcons,
+      offsetX + layout.margin,
+      y,
+      contentWidth,
+      colors,
+      layout.specs.iconSize,
+      layout.fontSize.specLabel,
+      layout.fontSize.specValue
     );
   }
 
   // Footer
-  await renderFooter(doc, config, offsetX, offsetY + height - layout.footer.offsetFromBottom, width, layout.footer.barcodeWidth, layout.footer.barcodeHeight, layout.footer.skuFontSize);
+  await renderFooter(
+    doc,
+    config,
+    offsetX,
+    offsetY + height - layout.footer.offsetFromBottom,
+    width,
+    layout.footer.barcodeWidth,
+    layout.footer.barcodeHeight,
+    layout.footer.skuFontSize
+  );
 }
 
-export async function generateShelfTag(config: PrebuildConfig, brandIcons: BrandIcon[] = []): Promise<jsPDF> {
+export async function generateShelfTag(
+  config: PrebuildConfig,
+  brandIcons: BrandIcon[] = []
+): Promise<jsPDF> {
   const size = CARD_SIZES.shelf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'in', format: [size.width, size.height] });
   await drawShelfTagAt(doc, config, 0, 0, brandIcons);
   return doc;
 }
 
-export async function generateShelfTagMultiUp(config: PrebuildConfig, includeCropMarks: boolean = true, brandIcons: BrandIcon[] = []): Promise<jsPDF> {
+export async function generateShelfTagMultiUp(
+  config: PrebuildConfig,
+  includeCropMarks: boolean = true,
+  brandIcons: BrandIcon[] = []
+): Promise<jsPDF> {
   const multiUp = getMultiUpConfig('shelf')!;
   const tagW = CARD_SIZES.shelf.width;
   const tagH = CARD_SIZES.shelf.height;
@@ -598,7 +700,12 @@ export async function generateShelfTagMultiUp(config: PrebuildConfig, includeCro
   doc.setFontSize(multiUp.footerFontSize);
   doc.setTextColor(150, 150, 150);
   const totalCards = multiUp.cols * multiUp.rows;
-  doc.text(`${config.modelName || 'PC Build'} - Shelf Tags (${totalCards} per page)`, multiUp.pageWidth / 2, multiUp.pageHeight - multiUp.footerY, { align: 'center' });
+  doc.text(
+    `${config.modelName || 'PC Build'} - Shelf Tags (${totalCards} per page)`,
+    multiUp.pageWidth / 2,
+    multiUp.pageHeight - multiUp.footerY,
+    { align: 'center' }
+  );
 
   return doc;
 }
@@ -637,7 +744,14 @@ async function drawPriceCardAt(
 
   // Logo
   if (config.storeLogo) {
-    const { height: logoH } = await addImageToPdf(doc, config.storeLogo, offsetX + layout.margin, y, contentWidth, layout.logoMaxHeight);
+    const { height: logoH } = await addImageToPdf(
+      doc,
+      config.storeLogo,
+      offsetX + layout.margin,
+      y,
+      contentWidth,
+      layout.logoMaxHeight
+    );
     y += logoH + layout.spacing.afterLogo;
   }
 
@@ -674,11 +788,24 @@ async function drawPriceCardAt(
   if (config.features.length > 0 && layout.maxFeatures > 0) {
     doc.setFontSize(layout.featureBadge.fontSize);
     const features = config.features.slice(0, layout.maxFeatures);
-    const totalW = features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) + (features.length - 1) * layout.featureBadge.spacing;
+    const totalW =
+      features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) +
+      (features.length - 1) * layout.featureBadge.spacing;
     let fx = centerX - totalW / 2;
 
     for (const feature of features) {
-      const fw = drawBadge(doc, feature, fx, y, lightenColor(colors.primary, 0.15), hexToRgb(colors.primary), layout.featureBadge.fontSize, layout.featureBadge.paddingX, layout.featureBadge.paddingY, layout.featureBadge.radius);
+      const fw = drawBadge(
+        doc,
+        feature,
+        fx,
+        y,
+        lightenColor(colors.primary, 0.15),
+        hexToRgb(colors.primary),
+        layout.featureBadge.fontSize,
+        layout.featureBadge.paddingX,
+        layout.featureBadge.paddingY,
+        layout.featureBadge.radius
+      );
       fx += fw + layout.featureBadge.spacing;
     }
     y += 0.2;
@@ -694,7 +821,15 @@ async function drawPriceCardAt(
 
   // Colored left accent
   doc.setFillColor(...hexToRgb(colors.primary));
-  doc.roundedRect(offsetX + layout.margin, y, layout.specs.accentWidth, specsHeight, 0.025, 0.025, 'F');
+  doc.roundedRect(
+    offsetX + layout.margin,
+    y,
+    layout.specs.accentWidth,
+    specsHeight,
+    0.025,
+    0.025,
+    'F'
+  );
 
   y += layout.specs.padding;
   const specX = offsetX + layout.margin + layout.specs.padding + layout.specs.accentWidth;
@@ -718,7 +853,15 @@ async function drawPriceCardAt(
     const brandIcon = findBrandIcon(value, brandIcons);
     let valueX = specX;
     if (brandIcon) {
-      await addImageToPdf(doc, brandIcon.image, specX, leftY + 0.12, layout.specs.iconSize, layout.specs.iconSize, false);
+      await addImageToPdf(
+        doc,
+        brandIcon.image,
+        specX,
+        leftY + 0.12,
+        layout.specs.iconSize,
+        layout.specs.iconSize,
+        false
+      );
       valueX += layout.specs.iconSize + 0.02;
     }
 
@@ -744,7 +887,15 @@ async function drawPriceCardAt(
     const brandIcon = findBrandIcon(value, brandIcons);
     let valueX = rightX;
     if (brandIcon) {
-      await addImageToPdf(doc, brandIcon.image, rightX, rightY + 0.12, layout.specs.iconSize, layout.specs.iconSize, false);
+      await addImageToPdf(
+        doc,
+        brandIcon.image,
+        rightX,
+        rightY + 0.12,
+        layout.specs.iconSize,
+        layout.specs.iconSize,
+        false
+      );
       valueX += layout.specs.iconSize + 0.02;
     }
 
@@ -759,39 +910,99 @@ async function drawPriceCardAt(
   y = specsY + specsHeight + 0.1;
 
   // Additional info bar
-  y = renderInfoBar(doc, config, colors, offsetX + layout.margin, y, contentWidth, layout.infoBar.height, layout.infoBar.labelFontSize, layout.infoBar.valueFontSize);
+  y = renderInfoBar(
+    doc,
+    config,
+    colors,
+    offsetX + layout.margin,
+    y,
+    contentWidth,
+    layout.infoBar.height,
+    layout.infoBar.labelFontSize,
+    layout.infoBar.valueFontSize
+  );
 
   // Product image & QR code
   const { visualSettings } = config;
   if (visualSettings?.productImage || (visualSettings?.showQrCode && visualSettings?.qrCodeUrl)) {
     const imgSize = layout.media.imageSize;
     if (visualSettings.productImage && visualSettings.showQrCode && visualSettings.qrCodeUrl) {
-      await addImageToPdf(doc, visualSettings.productImage, offsetX + layout.margin, y, imgSize, imgSize, false);
-      await addQrCodeToPdf(doc, visualSettings.qrCodeUrl, offsetX + width - layout.margin - layout.media.qrSize, y, layout.media.qrSize);
+      await addImageToPdf(
+        doc,
+        visualSettings.productImage,
+        offsetX + layout.margin,
+        y,
+        imgSize,
+        imgSize,
+        false
+      );
+      await addQrCodeToPdf(
+        doc,
+        visualSettings.qrCodeUrl,
+        offsetX + width - layout.margin - layout.media.qrSize,
+        y,
+        layout.media.qrSize
+      );
     } else if (visualSettings.productImage) {
-      await addImageToPdf(doc, visualSettings.productImage, centerX - imgSize / 2, y, imgSize, imgSize, false);
+      await addImageToPdf(
+        doc,
+        visualSettings.productImage,
+        centerX - imgSize / 2,
+        y,
+        imgSize,
+        imgSize,
+        false
+      );
     } else if (visualSettings.showQrCode && visualSettings.qrCodeUrl) {
-      await addQrCodeToPdf(doc, visualSettings.qrCodeUrl, centerX - layout.media.qrSize / 2, y, layout.media.qrSize);
+      await addQrCodeToPdf(
+        doc,
+        visualSettings.qrCodeUrl,
+        centerX - layout.media.qrSize / 2,
+        y,
+        layout.media.qrSize
+      );
     }
   }
 
   // Footer
   const footerY = offsetY + height - layout.footer.offsetFromBottom;
-  await renderFooter(doc, config, offsetX, footerY, width, layout.footer.barcodeWidth, layout.footer.barcodeHeight, layout.footer.skuFontSize);
+  await renderFooter(
+    doc,
+    config,
+    offsetX,
+    footerY,
+    width,
+    layout.footer.barcodeWidth,
+    layout.footer.barcodeHeight,
+    layout.footer.skuFontSize
+  );
 
   // Bottom accent line
   doc.setFillColor(...hexToRgb(colors.primary));
-  doc.rect(offsetX, offsetY + height - layout.footer.accentHeight, width, layout.footer.accentHeight, 'F');
+  doc.rect(
+    offsetX,
+    offsetY + height - layout.footer.accentHeight,
+    width,
+    layout.footer.accentHeight,
+    'F'
+  );
 }
 
-export async function generatePriceCard(config: PrebuildConfig, brandIcons: BrandIcon[] = []): Promise<jsPDF> {
+export async function generatePriceCard(
+  config: PrebuildConfig,
+  brandIcons: BrandIcon[] = []
+): Promise<jsPDF> {
   const size = CARD_SIZES.price;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'in', format: [size.width, size.height] });
   await drawPriceCardAt(doc, config, 0, 0, brandIcons);
   return doc;
 }
 
-export async function generatePriceCardMultiUp(config: PrebuildConfig, includeCropMarks: boolean = true, brandIcons: BrandIcon[] = []): Promise<jsPDF> {
+export async function generatePriceCardMultiUp(
+  config: PrebuildConfig,
+  includeCropMarks: boolean = true,
+  brandIcons: BrandIcon[] = []
+): Promise<jsPDF> {
   const multiUp = getMultiUpConfig('price')!;
   const cardW = CARD_SIZES.price.width;
   const cardH = CARD_SIZES.price.height;
@@ -825,7 +1036,12 @@ export async function generatePriceCardMultiUp(config: PrebuildConfig, includeCr
   doc.setFontSize(multiUp.footerFontSize);
   doc.setTextColor(150, 150, 150);
   const totalCards = multiUp.cols * multiUp.rows;
-  doc.text(`${config.modelName || 'PC Build'} - Price Cards (${totalCards} per page)`, multiUp.pageWidth / 2, multiUp.pageHeight - multiUp.footerY, { align: 'center' });
+  doc.text(
+    `${config.modelName || 'PC Build'} - Price Cards (${totalCards} per page)`,
+    multiUp.pageWidth / 2,
+    multiUp.pageHeight - multiUp.footerY,
+    { align: 'center' }
+  );
 
   return doc;
 }
@@ -834,7 +1050,10 @@ export async function generatePriceCardMultiUp(config: PrebuildConfig, includeCr
 // POSTER (8.5" × 11") - Full page display
 // ============================================================================
 
-export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIcon[] = []): Promise<jsPDF> {
+export async function generatePoster(
+  config: PrebuildConfig,
+  brandIcons: BrandIcon[] = []
+): Promise<jsPDF> {
   const layout = getLayoutConfig('poster');
   const width = CARD_SIZES.poster.width;
   const height = CARD_SIZES.poster.height;
@@ -855,7 +1074,14 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
 
   // Logo
   if (config.storeLogo) {
-    const { height: logoH } = await addImageToPdf(doc, config.storeLogo, layout.margin, y, contentWidth, layout.logoMaxHeight);
+    const { height: logoH } = await addImageToPdf(
+      doc,
+      config.storeLogo,
+      layout.margin,
+      y,
+      contentWidth,
+      layout.logoMaxHeight
+    );
     y += logoH + layout.spacing.afterLogo;
   }
 
@@ -895,7 +1121,15 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
   // Main price box
   const priceBoxH = layout.price.boxHeight;
   doc.setFillColor(...lightenColor(colors.priceColor, 0.92));
-  doc.roundedRect(layout.margin + 0.3, y, contentWidth - 0.6, priceBoxH, layout.price.boxRadius, layout.price.boxRadius, 'F');
+  doc.roundedRect(
+    layout.margin + 0.3,
+    y,
+    contentWidth - 0.6,
+    priceBoxH,
+    layout.price.boxRadius,
+    layout.price.boxRadius,
+    'F'
+  );
 
   // Side accents on price box
   doc.setFillColor(...hexToRgb(colors.priceColor));
@@ -916,7 +1150,13 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
   doc.setFillColor(...hexToRgb(colors.accent));
   doc.rect(0, y, width, POSTER_SPEC_HEADER.height, 'F');
   doc.setFillColor(...hexToRgb(colors.primary));
-  doc.rect(0, y + POSTER_SPEC_HEADER.height - POSTER_SPEC_HEADER.accentHeight, width, POSTER_SPEC_HEADER.accentHeight, 'F');
+  doc.rect(
+    0,
+    y + POSTER_SPEC_HEADER.height - POSTER_SPEC_HEADER.accentHeight,
+    width,
+    POSTER_SPEC_HEADER.accentHeight,
+    'F'
+  );
 
   doc.setFontSize(POSTER_SPEC_HEADER.fontSize);
   doc.setFont('helvetica', 'bold');
@@ -926,7 +1166,16 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
 
   // Spec cards - 2 columns, 4 rows
   const cardWidth = (contentWidth - 0.2) / 2;
-  const allSpecs: ComponentCategory[] = ['cpu', 'gpu', 'ram', 'storage', 'motherboard', 'psu', 'case', 'cooling'];
+  const allSpecs: ComponentCategory[] = [
+    'cpu',
+    'gpu',
+    'ram',
+    'storage',
+    'motherboard',
+    'psu',
+    'case',
+    'cooling',
+  ];
 
   for (let row = 0; row < 4; row++) {
     const leftSpec = allSpecs[row];
@@ -936,26 +1185,57 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
     // Left card
     if (config.components[leftSpec]) {
       doc.setFillColor(248, 249, 250);
-      doc.roundedRect(layout.margin, cardY, cardWidth, POSTER_SPEC_CARD.height, POSTER_SPEC_CARD.radius, POSTER_SPEC_CARD.radius, 'F');
+      doc.roundedRect(
+        layout.margin,
+        cardY,
+        cardWidth,
+        POSTER_SPEC_CARD.height,
+        POSTER_SPEC_CARD.radius,
+        POSTER_SPEC_CARD.radius,
+        'F'
+      );
       doc.setFillColor(...hexToRgb(colors.primary));
-      doc.roundedRect(layout.margin, cardY, POSTER_SPEC_CARD.accentWidth, POSTER_SPEC_CARD.height, 0.025, 0.025, 'F');
+      doc.roundedRect(
+        layout.margin,
+        cardY,
+        POSTER_SPEC_CARD.accentWidth,
+        POSTER_SPEC_CARD.height,
+        0.025,
+        0.025,
+        'F'
+      );
 
       doc.setFontSize(layout.fontSize.specLabel);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...hexToRgb(colors.primary));
-      doc.text(COMPONENT_LABELS[leftSpec].toUpperCase(), layout.margin + POSTER_SPEC_CARD.contentPadding, cardY + POSTER_SPEC_CARD.labelY);
+      doc.text(
+        COMPONENT_LABELS[leftSpec].toUpperCase(),
+        layout.margin + POSTER_SPEC_CARD.contentPadding,
+        cardY + POSTER_SPEC_CARD.labelY
+      );
 
       const brandIcon = findBrandIcon(config.components[leftSpec], brandIcons);
       let valueX = layout.margin + POSTER_SPEC_CARD.contentPadding;
       if (brandIcon) {
-        await addImageToPdf(doc, brandIcon.image, layout.margin + POSTER_SPEC_CARD.contentPadding, cardY + POSTER_SPEC_CARD.iconY, layout.specs.iconSize, layout.specs.iconSize, false);
+        await addImageToPdf(
+          doc,
+          brandIcon.image,
+          layout.margin + POSTER_SPEC_CARD.contentPadding,
+          cardY + POSTER_SPEC_CARD.iconY,
+          layout.specs.iconSize,
+          layout.specs.iconSize,
+          false
+        );
         valueX += layout.specs.iconSize + 0.04;
       }
 
       doc.setFontSize(layout.fontSize.specValue);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(40, 40, 40);
-      const valueLines = doc.splitTextToSize(config.components[leftSpec], cardWidth - (valueX - layout.margin) - 0.15);
+      const valueLines = doc.splitTextToSize(
+        config.components[leftSpec],
+        cardWidth - (valueX - layout.margin) - 0.15
+      );
       doc.text(valueLines[0], valueX, cardY + POSTER_SPEC_CARD.valueY);
     }
 
@@ -964,26 +1244,57 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
       const rightX = layout.margin + cardWidth + 0.2;
 
       doc.setFillColor(248, 249, 250);
-      doc.roundedRect(rightX, cardY, cardWidth, POSTER_SPEC_CARD.height, POSTER_SPEC_CARD.radius, POSTER_SPEC_CARD.radius, 'F');
+      doc.roundedRect(
+        rightX,
+        cardY,
+        cardWidth,
+        POSTER_SPEC_CARD.height,
+        POSTER_SPEC_CARD.radius,
+        POSTER_SPEC_CARD.radius,
+        'F'
+      );
       doc.setFillColor(...hexToRgb(colors.primary));
-      doc.roundedRect(rightX, cardY, POSTER_SPEC_CARD.accentWidth, POSTER_SPEC_CARD.height, 0.025, 0.025, 'F');
+      doc.roundedRect(
+        rightX,
+        cardY,
+        POSTER_SPEC_CARD.accentWidth,
+        POSTER_SPEC_CARD.height,
+        0.025,
+        0.025,
+        'F'
+      );
 
       doc.setFontSize(layout.fontSize.specLabel);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...hexToRgb(colors.primary));
-      doc.text(COMPONENT_LABELS[rightSpec].toUpperCase(), rightX + POSTER_SPEC_CARD.contentPadding, cardY + POSTER_SPEC_CARD.labelY);
+      doc.text(
+        COMPONENT_LABELS[rightSpec].toUpperCase(),
+        rightX + POSTER_SPEC_CARD.contentPadding,
+        cardY + POSTER_SPEC_CARD.labelY
+      );
 
       const brandIcon = findBrandIcon(config.components[rightSpec], brandIcons);
       let valueX = rightX + POSTER_SPEC_CARD.contentPadding;
       if (brandIcon) {
-        await addImageToPdf(doc, brandIcon.image, rightX + POSTER_SPEC_CARD.contentPadding, cardY + POSTER_SPEC_CARD.iconY, layout.specs.iconSize, layout.specs.iconSize, false);
+        await addImageToPdf(
+          doc,
+          brandIcon.image,
+          rightX + POSTER_SPEC_CARD.contentPadding,
+          cardY + POSTER_SPEC_CARD.iconY,
+          layout.specs.iconSize,
+          layout.specs.iconSize,
+          false
+        );
         valueX += layout.specs.iconSize + 0.04;
       }
 
       doc.setFontSize(layout.fontSize.specValue);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(40, 40, 40);
-      const valueLines = doc.splitTextToSize(config.components[rightSpec], cardWidth - (valueX - rightX) - 0.15);
+      const valueLines = doc.splitTextToSize(
+        config.components[rightSpec],
+        cardWidth - (valueX - rightX) - 0.15
+      );
       doc.text(valueLines[0], valueX, cardY + POSTER_SPEC_CARD.valueY);
     }
   }
@@ -991,7 +1302,17 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
   y += 4 * (POSTER_SPEC_CARD.height + POSTER_SPEC_CARD.gap) + 0.1;
 
   // Additional info bar
-  y = renderInfoBar(doc, config, colors, layout.margin, y, contentWidth, layout.infoBar.height, layout.infoBar.labelFontSize, layout.infoBar.valueFontSize);
+  y = renderInfoBar(
+    doc,
+    config,
+    colors,
+    layout.margin,
+    y,
+    contentWidth,
+    layout.infoBar.height,
+    layout.infoBar.labelFontSize,
+    layout.infoBar.valueFontSize
+  );
 
   // Description
   if (config.description) {
@@ -1007,12 +1328,25 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
   if (config.features.length > 0 && layout.maxFeatures > 0) {
     doc.setFontSize(layout.featureBadge.fontSize);
     const features = config.features.slice(0, layout.maxFeatures);
-    const totalW = features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) + (features.length - 1) * layout.featureBadge.spacing;
+    const totalW =
+      features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) +
+      (features.length - 1) * layout.featureBadge.spacing;
 
     if (totalW <= contentWidth) {
       let fx = centerX - totalW / 2;
       for (const feature of features) {
-        const fw = drawBadge(doc, feature, fx, y, hexToRgb(colors.primary), [255, 255, 255], layout.featureBadge.fontSize, layout.featureBadge.paddingX, layout.featureBadge.paddingY, layout.featureBadge.radius);
+        const fw = drawBadge(
+          doc,
+          feature,
+          fx,
+          y,
+          hexToRgb(colors.primary),
+          [255, 255, 255],
+          layout.featureBadge.fontSize,
+          layout.featureBadge.paddingX,
+          layout.featureBadge.paddingY,
+          layout.featureBadge.radius
+        );
         fx += fw + layout.featureBadge.spacing;
       }
     }
@@ -1024,12 +1358,25 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
   // QR code
   const { visualSettings } = config;
   if (visualSettings?.showQrCode && visualSettings?.qrCodeUrl) {
-    await addQrCodeToPdf(doc, visualSettings.qrCodeUrl, width - layout.margin - layout.media.qrSize, footerY - 0.7, layout.media.qrSize);
+    await addQrCodeToPdf(
+      doc,
+      visualSettings.qrCodeUrl,
+      width - layout.margin - layout.media.qrSize,
+      footerY - 0.7,
+      layout.media.qrSize
+    );
   }
 
   // Barcode
   if (config.sku && isValidBarcode(config.sku)) {
-    await addBarcodeToPdf(doc, config.sku, layout.margin, footerY - 0.05, layout.footer.barcodeWidth, layout.footer.barcodeHeight);
+    await addBarcodeToPdf(
+      doc,
+      config.sku,
+      layout.margin,
+      footerY - 0.05,
+      layout.footer.barcodeWidth,
+      layout.footer.barcodeHeight
+    );
   }
 
   // SKU text
@@ -1052,7 +1399,11 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
 // EXPORT FUNCTIONS
 // ============================================================================
 
-export async function generatePDF(config: PrebuildConfig, cardSize: CardSize, brandIcons: BrandIcon[] = []): Promise<jsPDF> {
+export async function generatePDF(
+  config: PrebuildConfig,
+  cardSize: CardSize,
+  brandIcons: BrandIcon[] = []
+): Promise<jsPDF> {
   switch (cardSize) {
     case 'shelf':
       return generateShelfTag(config, brandIcons);

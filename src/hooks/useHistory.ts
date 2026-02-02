@@ -26,10 +26,9 @@ export function useHistory<T>(initialState: T): UseHistoryReturn<T> {
   });
 
   const setState = useCallback((newState: T | ((prev: T) => T)) => {
-    setHistory(prev => {
-      const resolvedState = typeof newState === 'function'
-        ? (newState as (prev: T) => T)(prev.present)
-        : newState;
+    setHistory((prev) => {
+      const resolvedState =
+        typeof newState === 'function' ? (newState as (prev: T) => T)(prev.present) : newState;
 
       // Don't add to history if state hasn't changed
       if (JSON.stringify(resolvedState) === JSON.stringify(prev.present)) {
@@ -47,7 +46,7 @@ export function useHistory<T>(initialState: T): UseHistoryReturn<T> {
   }, []);
 
   const undo = useCallback(() => {
-    setHistory(prev => {
+    setHistory((prev) => {
       if (prev.past.length === 0) return prev;
 
       const newPast = prev.past.slice(0, -1);
@@ -63,7 +62,7 @@ export function useHistory<T>(initialState: T): UseHistoryReturn<T> {
   }, []);
 
   const redo = useCallback(() => {
-    setHistory(prev => {
+    setHistory((prev) => {
       if (prev.future.length === 0) return prev;
 
       const newFuture = prev.future.slice(1);

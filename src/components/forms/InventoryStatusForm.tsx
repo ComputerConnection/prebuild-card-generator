@@ -11,11 +11,14 @@ export function InventoryStatusForm() {
   const { config, setConfig } = useConfigStore();
   const [errors, setErrors] = useState<{ stockQuantity?: string }>({});
 
-  const handleQuantityChange = useCallback((value: string) => {
-    setConfig({ stockQuantity: value });
-    const validation = validateStockQuantity(value);
-    setErrors({ stockQuantity: validation.error });
-  }, [setConfig]);
+  const handleQuantityChange = useCallback(
+    (value: string) => {
+      setConfig({ stockQuantity: value });
+      const validation = validateStockQuantity(value);
+      setErrors({ stockQuantity: validation.error });
+    },
+    [setConfig]
+  );
 
   const handleQuantityBlur = useCallback(() => {
     const validation = validateStockQuantity(config.stockQuantity);
@@ -30,7 +33,9 @@ export function InventoryStatusForm() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
           <select
             value={config.condition ?? ''}
-            onChange={(e) => setConfig({ condition: e.target.value ? e.target.value as ConditionType : null })}
+            onChange={(e) =>
+              setConfig({ condition: e.target.value ? (e.target.value as ConditionType) : null })
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">Not specified</option>
@@ -45,7 +50,9 @@ export function InventoryStatusForm() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
           <select
             value={config.stockStatus ?? ''}
-            onChange={(e) => setConfig({ stockStatus: e.target.value ? e.target.value as StockStatus : null })}
+            onChange={(e) =>
+              setConfig({ stockStatus: e.target.value ? (e.target.value as StockStatus) : null })
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">No status</option>
@@ -56,7 +63,9 @@ export function InventoryStatusForm() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Quantity (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Quantity (optional)
+          </label>
           <input
             type="text"
             value={config.stockQuantity}

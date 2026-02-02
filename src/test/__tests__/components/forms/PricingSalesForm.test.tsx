@@ -154,7 +154,9 @@ describe('PricingSalesForm', () => {
       render(<PricingSalesForm />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Sale price must be less than original price/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Sale price must be less than original price/i)
+        ).toBeInTheDocument();
       });
     });
   });
@@ -330,7 +332,9 @@ describe('PricingSalesForm', () => {
 
       // With APR, payment should be higher than simple division
       const paymentText = screen.getByText(/\/mo$/);
-      const payment = parseFloat(paymentText.textContent?.replace('$', '').replace('/mo', '') || '0');
+      const payment = parseFloat(
+        paymentText.textContent?.replace('$', '').replace('/mo', '') || '0'
+      );
       expect(payment).toBeGreaterThan(100); // Should be > $100 due to interest
     });
   });

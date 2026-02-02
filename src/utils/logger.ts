@@ -61,7 +61,13 @@ export const logger = {
   },
 
   error(context: string, message: string, error?: unknown): void {
-    const entry: LogEntry = { level: 'error', context, message, data: error, timestamp: new Date() };
+    const entry: LogEntry = {
+      level: 'error',
+      context,
+      message,
+      data: error,
+      timestamp: new Date(),
+    };
     addToBuffer(entry);
     if (env.isDev) {
       console.error(formatMessage(context, message), error ?? '');
@@ -79,7 +85,7 @@ export const logger = {
    * Get recent errors only
    */
   getRecentErrors(count: number = 10): LogEntry[] {
-    return logBuffer.filter(e => e.level === 'error').slice(-count);
+    return logBuffer.filter((e) => e.level === 'error').slice(-count);
   },
 
   /**

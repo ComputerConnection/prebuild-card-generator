@@ -48,19 +48,13 @@ describe('generateQRCodeDataUrl', () => {
   it('should use default size of 128', async () => {
     const QRCode = vi.mocked(await import('qrcode')).default;
     await generateQRCodeDataUrl('test');
-    expect(QRCode.toDataURL).toHaveBeenCalledWith(
-      'test',
-      expect.objectContaining({ width: 128 })
-    );
+    expect(QRCode.toDataURL).toHaveBeenCalledWith('test', expect.objectContaining({ width: 128 }));
   });
 
   it('should accept custom size', async () => {
     const QRCode = vi.mocked(await import('qrcode')).default;
     await generateQRCodeDataUrl('test', 256);
-    expect(QRCode.toDataURL).toHaveBeenCalledWith(
-      'test',
-      expect.objectContaining({ width: 256 })
-    );
+    expect(QRCode.toDataURL).toHaveBeenCalledWith('test', expect.objectContaining({ width: 256 }));
   });
 
   it('should use correct QR code options', async () => {

@@ -186,9 +186,7 @@ describe('findBrandIcon', () => {
   });
 
   it('should match case-insensitively', () => {
-    const iconsLowercase: BrandIcon[] = [
-      { name: 'intel', image: 'data:image/png;base64,intel' },
-    ];
+    const iconsLowercase: BrandIcon[] = [{ name: 'intel', image: 'data:image/png;base64,intel' }];
     const result = findBrandIcon('Intel Core i7', iconsLowercase);
     expect(result).not.toBeNull();
   });

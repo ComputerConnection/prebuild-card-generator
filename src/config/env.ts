@@ -47,7 +47,10 @@ function getEnvBoolean(key: string, defaultValue: boolean): boolean {
   return value === 'true' || value === '1';
 }
 
-function getCardSize(key: string, defaultValue: 'shelf' | 'price' | 'poster'): 'shelf' | 'price' | 'poster' {
+function getCardSize(
+  key: string,
+  defaultValue: 'shelf' | 'price' | 'poster'
+): 'shelf' | 'price' | 'poster' {
   const value = import.meta.env[key];
   if (value === 'shelf' || value === 'price' || value === 'poster') {
     return value;

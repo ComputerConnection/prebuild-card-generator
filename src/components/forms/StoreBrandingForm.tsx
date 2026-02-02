@@ -48,7 +48,9 @@ export function StoreBrandingForm() {
         storeLogo: profile.logo,
         colorTheme: profile.defaultTheme,
         customColors:
-          profile.defaultTheme === 'custom' ? config.customColors : THEME_PRESETS[profile.defaultTheme],
+          profile.defaultTheme === 'custom'
+            ? config.customColors
+            : THEME_PRESETS[profile.defaultTheme],
       });
       setActiveProfile(profileId);
     }
@@ -102,9 +104,7 @@ export function StoreBrandingForm() {
               <div
                 key={profile.id}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-md border-2 ${
-                  activeProfileId === profile.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200'
+                  activeProfileId === profile.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
                 }`}
               >
                 <button
@@ -117,12 +117,7 @@ export function StoreBrandingForm() {
                   onClick={() => handleDeleteStoreProfile(profile.id)}
                   className="text-gray-400 hover:text-red-500 ml-1"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

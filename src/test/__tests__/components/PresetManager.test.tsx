@@ -49,56 +49,31 @@ describe('PresetManager', () => {
 
   describe('rendering', () => {
     it('should render heading', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText('Presets')).toBeInTheDocument();
     });
 
     it('should render search input', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByPlaceholderText('Search presets...')).toBeInTheDocument();
     });
 
     it('should render save preset button', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText('Save Current as Preset')).toBeInTheDocument();
     });
 
     it('should show empty state when no presets', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText('No saved presets yet')).toBeInTheDocument();
     });
 
     it('should render folder filter tabs', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText(/All/)).toBeInTheDocument();
     });
@@ -107,12 +82,7 @@ describe('PresetManager', () => {
   describe('save preset', () => {
     it('should show save input when save button clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Save Current as Preset'));
 
@@ -123,12 +93,7 @@ describe('PresetManager', () => {
 
     it('should not save preset with empty name', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Save Current as Preset'));
 
@@ -138,12 +103,7 @@ describe('PresetManager', () => {
 
     it('should save preset with valid name', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Save Current as Preset'));
       await user.type(screen.getByPlaceholderText('Preset name'), 'My Gaming Build');
@@ -155,12 +115,7 @@ describe('PresetManager', () => {
 
     it('should save preset on Enter key', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Save Current as Preset'));
       const nameInput = screen.getByPlaceholderText('Preset name');
@@ -172,12 +127,7 @@ describe('PresetManager', () => {
 
     it('should hide save input on cancel', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Save Current as Preset'));
       await user.click(screen.getByText('Cancel'));
@@ -187,12 +137,7 @@ describe('PresetManager', () => {
 
     it('should save preset to selected folder', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Save Current as Preset'));
       await user.type(screen.getByPlaceholderText('Preset name'), 'Foldered Build');
@@ -218,28 +163,20 @@ describe('PresetManager', () => {
           createdAt: Date.now(),
         },
       ];
-      localStorageMock.getItem.mockImplementation((key: string) => key === 'prebuild-card-presets' ? JSON.stringify(presets) : null);
+      localStorageMock.getItem.mockImplementation((key: string) =>
+        key === 'prebuild-card-presets' ? JSON.stringify(presets) : null
+      );
     });
 
     it('should display saved presets', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText('Gaming Build')).toBeInTheDocument();
     });
 
     it('should call onLoadPreset when preset clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       await user.click(screen.getByText('Gaming Build'));
 
@@ -249,12 +186,7 @@ describe('PresetManager', () => {
     });
 
     it('should display preset price', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText('$2,000.00')).toBeInTheDocument();
     });
@@ -265,17 +197,14 @@ describe('PresetManager', () => {
       const presets: Preset[] = [
         { id: '1', name: 'Delete Me', config: mockConfig, createdAt: Date.now() },
       ];
-      localStorageMock.getItem.mockImplementation((key: string) => key === 'prebuild-card-presets' ? JSON.stringify(presets) : null);
+      localStorageMock.getItem.mockImplementation((key: string) =>
+        key === 'prebuild-card-presets' ? JSON.stringify(presets) : null
+      );
     });
 
     it('should show confirm dialog when delete clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       // Find delete button (trash icon)
       const presetItem = screen.getByText('Delete Me').closest('.group');
@@ -289,12 +218,7 @@ describe('PresetManager', () => {
 
     it('should delete preset when confirmed', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const presetItem = screen.getByText('Delete Me').closest('.group');
       const deleteButton = presetItem?.querySelector('button[title="Delete"]');
@@ -307,12 +231,7 @@ describe('PresetManager', () => {
     it('should not delete preset when cancelled', async () => {
       confirmMock.mockReturnValue(false);
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const presetItem = screen.getByText('Delete Me').closest('.group');
       const deleteButton = presetItem?.querySelector('button[title="Delete"]');
@@ -327,17 +246,14 @@ describe('PresetManager', () => {
       const presets: Preset[] = [
         { id: '1', name: 'Original', config: mockConfig, createdAt: Date.now() },
       ];
-      localStorageMock.getItem.mockImplementation((key: string) => key === 'prebuild-card-presets' ? JSON.stringify(presets) : null);
+      localStorageMock.getItem.mockImplementation((key: string) =>
+        key === 'prebuild-card-presets' ? JSON.stringify(presets) : null
+      );
     });
 
     it('should duplicate preset', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const presetItem = screen.getByText('Original').closest('.group');
       const duplicateButton = presetItem?.querySelector('button[title="Duplicate"]');
@@ -352,21 +268,33 @@ describe('PresetManager', () => {
   describe('search', () => {
     beforeEach(() => {
       const presets: Preset[] = [
-        { id: '1', name: 'Gaming Build', config: { ...mockConfig, modelName: 'Gaming PC' }, createdAt: Date.now() },
-        { id: '2', name: 'Work Build', config: { ...mockConfig, modelName: 'Workstation' }, createdAt: Date.now() },
-        { id: '3', name: 'Budget Build', config: { ...mockConfig, modelName: 'Budget PC' }, createdAt: Date.now() },
+        {
+          id: '1',
+          name: 'Gaming Build',
+          config: { ...mockConfig, modelName: 'Gaming PC' },
+          createdAt: Date.now(),
+        },
+        {
+          id: '2',
+          name: 'Work Build',
+          config: { ...mockConfig, modelName: 'Workstation' },
+          createdAt: Date.now(),
+        },
+        {
+          id: '3',
+          name: 'Budget Build',
+          config: { ...mockConfig, modelName: 'Budget PC' },
+          createdAt: Date.now(),
+        },
       ];
-      localStorageMock.getItem.mockImplementation((key: string) => key === 'prebuild-card-presets' ? JSON.stringify(presets) : null);
+      localStorageMock.getItem.mockImplementation((key: string) =>
+        key === 'prebuild-card-presets' ? JSON.stringify(presets) : null
+      );
     });
 
     it('should filter presets by name', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const searchInput = screen.getByPlaceholderText('Search presets...');
       await user.type(searchInput, 'Gaming');
@@ -378,12 +306,7 @@ describe('PresetManager', () => {
 
     it('should filter presets by model name', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const searchInput = screen.getByPlaceholderText('Search presets...');
       await user.type(searchInput, 'Workstation');
@@ -395,12 +318,7 @@ describe('PresetManager', () => {
 
     it('should show no results message when search has no matches', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const searchInput = screen.getByPlaceholderText('Search presets...');
       await user.type(searchInput, 'xyz');
@@ -412,20 +330,29 @@ describe('PresetManager', () => {
   describe('folder filtering', () => {
     beforeEach(() => {
       const presets: Preset[] = [
-        { id: '1', name: 'Gaming Preset', config: mockConfig, createdAt: Date.now(), folder: 'gaming' },
-        { id: '2', name: 'Work Preset', config: mockConfig, createdAt: Date.now(), folder: 'workstation' },
+        {
+          id: '1',
+          name: 'Gaming Preset',
+          config: mockConfig,
+          createdAt: Date.now(),
+          folder: 'gaming',
+        },
+        {
+          id: '2',
+          name: 'Work Preset',
+          config: mockConfig,
+          createdAt: Date.now(),
+          folder: 'workstation',
+        },
         { id: '3', name: 'No Folder', config: mockConfig, createdAt: Date.now() },
       ];
-      localStorageMock.getItem.mockImplementation((key: string) => key === 'prebuild-card-presets' ? JSON.stringify(presets) : null);
+      localStorageMock.getItem.mockImplementation((key: string) =>
+        key === 'prebuild-card-presets' ? JSON.stringify(presets) : null
+      );
     });
 
     it('should show all presets when All tab selected', () => {
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       expect(screen.getByText('Gaming Preset')).toBeInTheDocument();
       expect(screen.getByText('Work Preset')).toBeInTheDocument();
@@ -434,12 +361,7 @@ describe('PresetManager', () => {
 
     it('should filter by folder when folder tab clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       // Find the Gaming folder tab by looking for "Gaming (1)" pattern
       const gamingTab = screen.getByText(/Gaming \(1\)/);
@@ -467,12 +389,7 @@ describe('PresetManager', () => {
 
     it('should move preset to folder', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       // Use getAllByText since preset name appears in button and may appear elsewhere
       const presetButtons = screen.getAllByText('Move Me');
@@ -495,7 +412,9 @@ describe('PresetManager', () => {
         { id: '1', name: 'Print 1', config: mockConfig, createdAt: Date.now() },
         { id: '2', name: 'Print 2', config: mockConfig, createdAt: Date.now() },
       ];
-      localStorageMock.getItem.mockImplementation((key: string) => key === 'prebuild-card-presets' ? JSON.stringify(presets) : null);
+      localStorageMock.getItem.mockImplementation((key: string) =>
+        key === 'prebuild-card-presets' ? JSON.stringify(presets) : null
+      );
     });
 
     it('should show print button when presets selected', async () => {
@@ -542,12 +461,7 @@ describe('PresetManager', () => {
 
     it('should not show print button when no onPrintQueue prop', async () => {
       const user = userEvent.setup();
-      render(
-        <PresetManager
-          currentConfig={mockConfig}
-          onLoadPreset={mockOnLoadPreset}
-        />
-      );
+      render(<PresetManager currentConfig={mockConfig} onLoadPreset={mockOnLoadPreset} />);
 
       const checkboxes = screen.getAllByRole('checkbox');
       await user.click(checkboxes[0]);

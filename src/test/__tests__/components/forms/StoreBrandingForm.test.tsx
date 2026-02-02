@@ -157,9 +157,7 @@ describe('StoreBrandingForm', () => {
 
     it('should show profiles section when profiles exist', () => {
       useBrandIconsStore.setState({
-        profiles: [
-          { id: '1', name: 'Tech Store', logo: null, defaultTheme: 'gaming' },
-        ],
+        profiles: [{ id: '1', name: 'Tech Store', logo: null, defaultTheme: 'gaming' }],
         activeProfileId: null,
         brandIcons: [],
       });
@@ -200,7 +198,12 @@ describe('StoreBrandingForm', () => {
       const user = userEvent.setup();
       useBrandIconsStore.setState({
         profiles: [
-          { id: '1', name: 'Gaming Store', logo: 'data:image/png;base64,logo', defaultTheme: 'gaming' },
+          {
+            id: '1',
+            name: 'Gaming Store',
+            logo: 'data:image/png;base64,logo',
+            defaultTheme: 'gaming',
+          },
         ],
         activeProfileId: null,
         brandIcons: [],
@@ -219,9 +222,7 @@ describe('StoreBrandingForm', () => {
 
     it('should highlight active profile', () => {
       useBrandIconsStore.setState({
-        profiles: [
-          { id: '1', name: 'Active Store', logo: null, defaultTheme: 'gaming' },
-        ],
+        profiles: [{ id: '1', name: 'Active Store', logo: null, defaultTheme: 'gaming' }],
         activeProfileId: '1',
         brandIcons: [],
       });
@@ -237,9 +238,7 @@ describe('StoreBrandingForm', () => {
     it('should delete profile when delete button clicked', async () => {
       const user = userEvent.setup();
       useBrandIconsStore.setState({
-        profiles: [
-          { id: '1', name: 'Delete Me', logo: null, defaultTheme: 'gaming' },
-        ],
+        profiles: [{ id: '1', name: 'Delete Me', logo: null, defaultTheme: 'gaming' }],
         activeProfileId: null,
         brandIcons: [],
       });

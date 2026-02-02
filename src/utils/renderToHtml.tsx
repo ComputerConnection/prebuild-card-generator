@@ -40,8 +40,8 @@ interface ScaleFactors {
 }
 
 const DEFAULT_SCALE: ScaleFactors = {
-  font: 0.65,  // PDF fonts are in points, preview needs smaller
-  inch: 40,    // 1 inch = 40px in preview (roughly)
+  font: 0.65, // PDF fonts are in points, preview needs smaller
+  inch: 40, // 1 inch = 40px in preview (roughly)
 };
 
 // ============================================================================
@@ -89,9 +89,7 @@ function renderText(el: TextElement, scale: ScaleFactors): React.ReactNode {
     textAlign: el.style.align,
   };
 
-  const className = el.maxLines
-    ? `line-clamp-${el.maxLines}`
-    : '';
+  const className = el.maxLines ? `line-clamp-${el.maxLines}` : '';
 
   if (el.strikethrough) {
     return (
@@ -110,14 +108,10 @@ function renderText(el: TextElement, scale: ScaleFactors): React.ReactNode {
 
 function renderBadgeRow(el: BadgeRowElement, scale: ScaleFactors): React.ReactNode {
   const justifyClass =
-    el.align === 'left' ? 'justify-start' :
-    el.align === 'right' ? 'justify-end' : 'justify-center';
+    el.align === 'left' ? 'justify-start' : el.align === 'right' ? 'justify-end' : 'justify-center';
 
   return (
-    <div
-      key={el.id}
-      className={`flex flex-wrap ${justifyClass} gap-1 my-0.5`}
-    >
+    <div key={el.id} className={`flex flex-wrap ${justifyClass} gap-1 my-0.5`}>
       {el.badges.map((badge, i) => (
         <span
           key={i}
@@ -216,19 +210,14 @@ function renderSpecs(el: SpecsElement, scale: ScaleFactors): React.ReactNode {
     position: 'relative',
   };
 
-  const gridClass = el.layout === 'two-column'
-    ? 'grid grid-cols-2 gap-x-1 gap-y-0.5'
-    : 'space-y-0.5';
+  const gridClass =
+    el.layout === 'two-column' ? 'grid grid-cols-2 gap-x-1 gap-y-0.5' : 'space-y-0.5';
 
   // Split specs for two-column layout
-  const leftSpecs = el.layout === 'two-column'
-    ? el.specs.slice(0, 4)
-    : el.specs;
-  const rightSpecs = el.layout === 'two-column'
-    ? el.specs.slice(4)
-    : [];
+  const leftSpecs = el.layout === 'two-column' ? el.specs.slice(0, 4) : el.specs;
+  const rightSpecs = el.layout === 'two-column' ? el.specs.slice(4) : [];
 
-  const renderSpecItem = (spec: typeof el.specs[0]) => (
+  const renderSpecItem = (spec: (typeof el.specs)[0]) => (
     <div key={spec.key}>
       <p
         className="font-bold leading-tight"
@@ -279,17 +268,15 @@ function renderSpecs(el: SpecsElement, scale: ScaleFactors): React.ReactNode {
       <div
         className={gridClass}
         style={{
-          paddingLeft: el.style.accentWidth ? `${el.style.accentWidth * scale.inch + 2}px` : undefined,
+          paddingLeft: el.style.accentWidth
+            ? `${el.style.accentWidth * scale.inch + 2}px`
+            : undefined,
         }}
       >
         {el.layout === 'two-column' ? (
           <>
-            <div className="space-y-0.5">
-              {leftSpecs.map(renderSpecItem)}
-            </div>
-            <div className="space-y-0.5">
-              {rightSpecs.map(renderSpecItem)}
-            </div>
+            <div className="space-y-0.5">{leftSpecs.map(renderSpecItem)}</div>
+            <div className="space-y-0.5">{rightSpecs.map(renderSpecItem)}</div>
           </>
         ) : (
           leftSpecs.map(renderSpecItem)
@@ -337,7 +324,11 @@ function renderInfoBar(el: InfoBarElement, scale: ScaleFactors): React.ReactNode
   );
 }
 
-function renderBarcode(el: BarcodeElement, scale: ScaleFactors, barcodeImage?: string): React.ReactNode {
+function renderBarcode(
+  el: BarcodeElement,
+  scale: ScaleFactors,
+  barcodeImage?: string
+): React.ReactNode {
   if (!barcodeImage) return null;
   return (
     <div key={el.id} className="flex justify-center my-0.5">

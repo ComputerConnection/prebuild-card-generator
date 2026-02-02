@@ -28,7 +28,12 @@ const preloadPDFModule = async () => {
   return pdfModule;
 };
 
-export const PDFExporter = memo(function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: PDFExporterProps) {
+export const PDFExporter = memo(function PDFExporter({
+  config,
+  cardSize,
+  onCardSizeChange,
+  brandIcons,
+}: PDFExporterProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const [isGeneratingShelfMultiUp, setIsGeneratingShelfMultiUp] = useState(false);
@@ -84,7 +89,7 @@ export const PDFExporter = memo(function PDFExporter({ config, cardSize, onCardS
 
         // Small delay between downloads to prevent browser issues
         if (i < ALL_SIZES.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 300));
         }
       }
     } catch (error) {
@@ -126,7 +131,13 @@ export const PDFExporter = memo(function PDFExporter({ config, cardSize, onCardS
     }
   }, [config, brandIcons, loadPDFModule]);
 
-  const isDisabled = isGenerating || isGeneratingAll || isGeneratingShelfMultiUp || isGeneratingPriceMultiUp || isPreparingEmail || isLoadingModule;
+  const isDisabled =
+    isGenerating ||
+    isGeneratingAll ||
+    isGeneratingShelfMultiUp ||
+    isGeneratingPriceMultiUp ||
+    isPreparingEmail ||
+    isLoadingModule;
 
   const handlePrepareEmail = useCallback(async () => {
     setIsPreparingEmail(true);
@@ -149,10 +160,7 @@ export const PDFExporter = memo(function PDFExporter({ config, cardSize, onCardS
   }, []);
 
   return (
-    <div
-      className="bg-white rounded-lg shadow-md p-4"
-      onMouseEnter={handleMouseEnter}
-    >
+    <div className="bg-white rounded-lg shadow-md p-4" onMouseEnter={handleMouseEnter}>
       <h2 id={`${baseId}-heading`} className="text-lg font-semibold text-gray-800 mb-3">
         Export PDF
       </h2>

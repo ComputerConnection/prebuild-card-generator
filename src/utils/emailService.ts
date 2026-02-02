@@ -46,7 +46,7 @@ export function clearEmailConfig(): void {
 // Save email to history
 export function addToEmailHistory(email: string): void {
   const history = getEmailHistory();
-  const updated = [email, ...history.filter(e => e !== email)].slice(0, 10);
+  const updated = [email, ...history.filter((e) => e !== email)].slice(0, 10);
   localStorage.setItem(EMAIL_HISTORY_KEY, JSON.stringify(updated));
 }
 
@@ -77,9 +77,18 @@ export async function sendEmailWithEmailJS(
       await loadEmailJSScript();
     }
 
-    const emailjs = (window as unknown as { emailjs: {
-      send: (serviceId: string, templateId: string, params: Record<string, string>, publicKey: string) => Promise<{ status: number; text: string }>;
-    } }).emailjs;
+    const emailjs = (
+      window as unknown as {
+        emailjs: {
+          send: (
+            serviceId: string,
+            templateId: string,
+            params: Record<string, string>,
+            publicKey: string
+          ) => Promise<{ status: number; text: string }>;
+        };
+      }
+    ).emailjs;
 
     const templateParams: Record<string, string> = {
       to_email: data.to,
@@ -109,7 +118,7 @@ export async function sendEmailWithEmailJS(
     console.error('EmailJS error:', err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Failed to send email'
+      error: err instanceof Error ? err.message : 'Failed to send email',
     };
   }
 }
@@ -131,11 +140,7 @@ function loadEmailJSScript(): Promise<void> {
 }
 
 // Open email client with pre-filled content (fallback method)
-export function openEmailClient(
-  to: string,
-  subject: string,
-  body: string
-): void {
+export function openEmailClient(to: string, subject: string, body: string): void {
   const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoUrl;
 }
@@ -159,7 +164,7 @@ export function generateEmailBody(
   body += `─────────────────────────\n`;
 
   const specOrder = ['CPU', 'GPU', 'RAM', 'Storage', 'Motherboard', 'PSU', 'Case', 'Cooling'];
-  specOrder.forEach(key => {
+  specOrder.forEach((key) => {
     const value = specs[key.toLowerCase()];
     if (value) {
       body += `${key}: ${value}\n`;
@@ -194,9 +199,13 @@ export async function shareViaWebShare(
       text,
     };
 
-    if (pdfBlob && navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], 'spec.pdf')] })) {
+    if (
+      pdfBlob &&
+      navigator.canShare &&
+      navigator.canShare({ files: [new File([pdfBlob], 'spec.pdf')] })
+    ) {
       const file = new File([pdfBlob], `${title.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`, {
-        type: 'application/pdf'
+        type: 'application/pdf',
       });
       shareData.files = [file];
     }
@@ -209,7 +218,7 @@ export async function shareViaWebShare(
     }
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Share failed'
+      error: err instanceof Error ? err.message : 'Share failed',
     };
   }
 }

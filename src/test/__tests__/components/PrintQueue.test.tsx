@@ -107,10 +107,7 @@ describe('PrintQueue', () => {
 
     it('should display queue count in header', () => {
       usePrintQueueStore.setState({
-        queue: [
-          createMockPreset('1', 'Gaming PC'),
-          createMockPreset('2', 'Workstation'),
-        ],
+        queue: [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')],
       });
 
       render(<PrintQueue />);
@@ -119,10 +116,7 @@ describe('PrintQueue', () => {
 
     it('should display preset names in queue', () => {
       usePrintQueueStore.setState({
-        queue: [
-          createMockPreset('1', 'Gaming PC'),
-          createMockPreset('2', 'Workstation'),
-        ],
+        queue: [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')],
       });
 
       render(<PrintQueue />);
@@ -151,10 +145,7 @@ describe('PrintQueue', () => {
 
     it('should show download button with count', () => {
       usePrintQueueStore.setState({
-        queue: [
-          createMockPreset('1', 'Gaming PC'),
-          createMockPreset('2', 'Workstation'),
-        ],
+        queue: [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')],
       });
 
       render(<PrintQueue />);
@@ -184,10 +175,7 @@ describe('PrintQueue', () => {
     it('should clear queue when clear all is clicked', async () => {
       const user = userEvent.setup();
       usePrintQueueStore.setState({
-        queue: [
-          createMockPreset('1', 'Gaming PC'),
-          createMockPreset('2', 'Workstation'),
-        ],
+        queue: [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')],
       });
 
       render(<PrintQueue />);
@@ -204,10 +192,7 @@ describe('PrintQueue', () => {
     it('should remove preset when remove button is clicked', async () => {
       const user = userEvent.setup();
       usePrintQueueStore.setState({
-        queue: [
-          createMockPreset('1', 'Gaming PC'),
-          createMockPreset('2', 'Workstation'),
-        ],
+        queue: [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')],
       });
 
       render(<PrintQueue />);
@@ -366,10 +351,7 @@ describe('PrintQueue', () => {
   describe('drag and drop', () => {
     it('should have draggable items', () => {
       usePrintQueueStore.setState({
-        queue: [
-          createMockPreset('1', 'Gaming PC'),
-          createMockPreset('2', 'Workstation'),
-        ],
+        queue: [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')],
       });
 
       render(<PrintQueue />);

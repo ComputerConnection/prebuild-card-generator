@@ -84,10 +84,7 @@ function buildBadges(
 }
 
 /** Build spec items from config */
-function buildSpecItems(
-  ctx: LayoutBuilderContext,
-  specKeys: ComponentCategory[]
-): SpecItem[] {
+function buildSpecItems(ctx: LayoutBuilderContext, specKeys: ComponentCategory[]): SpecItem[] {
   const { config, brandIcons } = ctx;
   const items: SpecItem[] = [];
 
@@ -100,9 +97,7 @@ function buildSpecItems(
       key,
       label: COMPONENT_LABELS[key],
       value,
-      brandIcon: brandIcon
-        ? { src: brandIcon.image, name: brandIcon.name }
-        : undefined,
+      brandIcon: brandIcon ? { src: brandIcon.image, name: brandIcon.name } : undefined,
     });
   }
 
@@ -417,7 +412,16 @@ export function buildPriceCardLayout(ctx: LayoutBuilderContext): CardLayout {
   }
 
   // Specs section (two columns)
-  const allSpecs: ComponentCategory[] = ['cpu', 'gpu', 'ram', 'storage', 'motherboard', 'psu', 'case', 'cooling'];
+  const allSpecs: ComponentCategory[] = [
+    'cpu',
+    'gpu',
+    'ram',
+    'storage',
+    'motherboard',
+    'psu',
+    'case',
+    'cooling',
+  ];
   const specs = buildSpecItems(ctx, allSpecs);
   if (specs.length > 0) {
     elements.push({
@@ -673,7 +677,16 @@ export function buildPosterLayout(ctx: LayoutBuilderContext): CardLayout {
   });
 
   // Specs section (two columns, card style)
-  const allSpecs: ComponentCategory[] = ['cpu', 'gpu', 'ram', 'storage', 'motherboard', 'psu', 'case', 'cooling'];
+  const allSpecs: ComponentCategory[] = [
+    'cpu',
+    'gpu',
+    'ram',
+    'storage',
+    'motherboard',
+    'psu',
+    'case',
+    'cooling',
+  ];
   const specs = buildSpecItems(ctx, allSpecs);
   if (specs.length > 0) {
     elements.push({

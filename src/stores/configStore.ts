@@ -71,10 +71,7 @@ interface ConfigState {
   setVisualSettings: (settings: Partial<VisualSettings>) => void;
 }
 
-const pushToHistory = (
-  state: ConfigState,
-  _newConfig: PrebuildConfig
-): HistoryState => {
+const pushToHistory = (state: ConfigState, _newConfig: PrebuildConfig): HistoryState => {
   // _newConfig is passed for reference but we save current state before update
   void _newConfig;
   const newPast = [...state.history.past, state.config];

@@ -30,9 +30,9 @@ interface CardPreviewProps {
  * This determines how large the preview appears on screen
  */
 const PREVIEW_SCALE: Record<CardSize, number> = {
-  shelf: 60,   // 2" × 60 = 120px width
-  price: 50,   // 4" × 50 = 200px width
-  poster: 33,  // 8.5" × 33 = 280px width
+  shelf: 60, // 2" × 60 = 120px width
+  price: 50, // 4" × 50 = 200px width
+  poster: 33, // 8.5" × 33 = 280px width
 };
 
 export function CardPreviewUnified({ config, cardSize, brandIcons }: CardPreviewProps) {

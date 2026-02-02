@@ -50,7 +50,7 @@ function parseCSV(text: string): string[][] {
         currentCell = '';
       } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
         currentRow.push(currentCell.trim());
-        if (currentRow.some(cell => cell)) {
+        if (currentRow.some((cell) => cell)) {
           rows.push(currentRow);
         }
         currentRow = [];
@@ -65,7 +65,7 @@ function parseCSV(text: string): string[][] {
   // Handle last row
   if (currentCell || currentRow.length > 0) {
     currentRow.push(currentCell.trim());
-    if (currentRow.some(cell => cell)) {
+    if (currentRow.some((cell) => cell)) {
       rows.push(currentRow);
     }
   }
@@ -75,49 +75,49 @@ function parseCSV(text: string): string[][] {
 
 // Map header names to config fields
 const HEADER_MAP: Record<string, string> = {
-  'model': 'modelName',
-  'modelname': 'modelName',
+  model: 'modelName',
+  modelname: 'modelName',
   'model name': 'modelName',
-  'name': 'modelName',
-  'price': 'price',
-  'sku': 'sku',
-  'cpu': 'cpu',
-  'processor': 'cpu',
-  'gpu': 'gpu',
-  'graphics': 'gpu',
+  name: 'modelName',
+  price: 'price',
+  sku: 'sku',
+  cpu: 'cpu',
+  processor: 'cpu',
+  gpu: 'gpu',
+  graphics: 'gpu',
   'graphics card': 'gpu',
   'video card': 'gpu',
-  'ram': 'ram',
-  'memory': 'ram',
-  'storage': 'storage',
-  'drive': 'storage',
-  'ssd': 'storage',
-  'motherboard': 'motherboard',
-  'mobo': 'motherboard',
-  'psu': 'psu',
+  ram: 'ram',
+  memory: 'ram',
+  storage: 'storage',
+  drive: 'storage',
+  ssd: 'storage',
+  motherboard: 'motherboard',
+  mobo: 'motherboard',
+  psu: 'psu',
   'power supply': 'psu',
-  'case': 'case',
-  'chassis': 'case',
-  'cooling': 'cooling',
-  'cooler': 'cooling',
+  case: 'case',
+  chassis: 'case',
+  cooling: 'cooling',
+  cooler: 'cooling',
   'cpu cooler': 'cooling',
-  'os': 'os',
+  os: 'os',
   'operating system': 'os',
-  'warranty': 'warranty',
-  'wifi': 'wifi',
-  'connectivity': 'wifi',
-  'network': 'wifi',
-  'tier': 'buildTier',
+  warranty: 'warranty',
+  wifi: 'wifi',
+  connectivity: 'wifi',
+  network: 'wifi',
+  tier: 'buildTier',
   'build tier': 'buildTier',
-  'buildtier': 'buildTier',
-  'category': 'buildTier',
-  'description': 'description',
-  'desc': 'description',
-  'condition': 'condition',
-  'stock': 'stockStatus',
+  buildtier: 'buildTier',
+  category: 'buildTier',
+  description: 'description',
+  desc: 'description',
+  condition: 'condition',
+  stock: 'stockStatus',
   'stock status': 'stockStatus',
-  'quantity': 'stockQuantity',
-  'qty': 'stockQuantity',
+  quantity: 'stockQuantity',
+  qty: 'stockQuantity',
 };
 
 // Component fields
@@ -127,12 +127,12 @@ const COMPONENT_FIELDS = ['cpu', 'gpu', 'ram', 'storage', 'motherboard', 'psu', 
 export function parseSheetData(rows: string[][]): Partial<PrebuildConfig>[] {
   if (rows.length < 2) return [];
 
-  const headers = rows[0].map(h => h.toLowerCase().trim());
+  const headers = rows[0].map((h) => h.toLowerCase().trim());
   const builds: Partial<PrebuildConfig>[] = [];
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    if (!row.some(cell => cell)) continue;
+    if (!row.some((cell) => cell)) continue;
 
     const build: Partial<PrebuildConfig> = {
       components: { ...defaultConfig.components },
@@ -154,17 +154,17 @@ export function parseSheetData(rows: string[][]): Partial<PrebuildConfig>[] {
       } else if (mappedField === 'condition') {
         // Map condition values
         const condMap: Record<string, string> = {
-          'new': 'new',
+          new: 'new',
           'brand new': 'new',
-          'preowned': 'preowned',
+          preowned: 'preowned',
           'pre-owned': 'preowned',
-          'used': 'preowned',
-          'refurbished': 'refurbished',
-          'refurb': 'refurbished',
+          used: 'preowned',
+          refurbished: 'refurbished',
+          refurb: 'refurbished',
           'open box': 'open_box',
-          'openbox': 'open_box',
-          'cpo': 'certified_preowned',
-          'certified': 'certified_preowned',
+          openbox: 'open_box',
+          cpo: 'certified_preowned',
+          certified: 'certified_preowned',
           'certified pre-owned': 'certified_preowned',
         };
         const mappedCondition = condMap[value.toLowerCase()];
@@ -172,18 +172,18 @@ export function parseSheetData(rows: string[][]): Partial<PrebuildConfig>[] {
       } else if (mappedField === 'stockStatus') {
         const stockMap: Record<string, string> = {
           'in stock': 'in_stock',
-          'instock': 'in_stock',
-          'available': 'in_stock',
+          instock: 'in_stock',
+          available: 'in_stock',
           'low stock': 'low_stock',
-          'lowstock': 'low_stock',
-          'low': 'low_stock',
+          lowstock: 'low_stock',
+          low: 'low_stock',
           'out of stock': 'out_of_stock',
-          'outofstock': 'out_of_stock',
-          'oos': 'out_of_stock',
+          outofstock: 'out_of_stock',
+          oos: 'out_of_stock',
           'sold out': 'out_of_stock',
           'on order': 'on_order',
-          'onorder': 'on_order',
-          'ordered': 'on_order',
+          onorder: 'on_order',
+          ordered: 'on_order',
         };
         const mappedStatus = stockMap[value.toLowerCase()];
         (build as Record<string, unknown>)[mappedField] = mappedStatus || null;
@@ -194,7 +194,7 @@ export function parseSheetData(rows: string[][]): Partial<PrebuildConfig>[] {
       }
     });
 
-    if (build.modelName || build.price || Object.values(build.components || {}).some(v => v)) {
+    if (build.modelName || build.price || Object.values(build.components || {}).some((v) => v)) {
       builds.push(build);
     }
   }
@@ -224,7 +224,7 @@ export async function importFromGoogleSheet(urlOrId: string): Promise<{
       if (response.status === 403 || response.status === 401) {
         return {
           success: false,
-          error: 'Cannot access sheet. Make sure it\'s shared as "Anyone with the link can view"'
+          error: 'Cannot access sheet. Make sure it\'s shared as "Anyone with the link can view"',
         };
       }
       return { success: false, error: `Failed to fetch sheet: ${response.statusText}` };
@@ -235,7 +235,7 @@ export async function importFromGoogleSheet(urlOrId: string): Promise<{
     if (text.includes('<!DOCTYPE html>') || text.includes('<html')) {
       return {
         success: false,
-        error: 'Cannot access sheet. Make sure it\'s shared as "Anyone with the link can view"'
+        error: 'Cannot access sheet. Make sure it\'s shared as "Anyone with the link can view"',
       };
     }
 
@@ -246,7 +246,10 @@ export async function importFromGoogleSheet(urlOrId: string): Promise<{
 
     const builds = parseSheetData(rows);
     if (builds.length === 0) {
-      return { success: false, error: 'No valid builds found. Check that column headers match expected names.' };
+      return {
+        success: false,
+        error: 'No valid builds found. Check that column headers match expected names.',
+      };
     }
 
     return { success: true, builds };
@@ -254,7 +257,7 @@ export async function importFromGoogleSheet(urlOrId: string): Promise<{
     console.error('Google Sheets import error:', err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Unknown error occurred'
+      error: err instanceof Error ? err.message : 'Unknown error occurred',
     };
   }
 }
@@ -290,27 +293,31 @@ export function exportToCSV(builds: PrebuildConfig[]): string {
     return value;
   };
 
-  const rows = builds.map(build => [
-    build.modelName || '',
-    build.price > 0 ? formatPrice(build.price, false) : '',
-    build.sku || '',
-    build.components.cpu || '',
-    build.components.gpu || '',
-    build.components.ram || '',
-    build.components.storage || '',
-    build.components.motherboard || '',
-    build.components.psu || '',
-    build.components.case || '',
-    build.components.cooling || '',
-    build.os || '',
-    build.warranty || '',
-    build.wifi || '',
-    build.buildTier || '',
-    build.condition ?? '',
-    build.stockStatus ?? '',
-    build.stockQuantity || '',
-    build.description || '',
-  ].map(escapeCell).join(','));
+  const rows = builds.map((build) =>
+    [
+      build.modelName || '',
+      build.price > 0 ? formatPrice(build.price, false) : '',
+      build.sku || '',
+      build.components.cpu || '',
+      build.components.gpu || '',
+      build.components.ram || '',
+      build.components.storage || '',
+      build.components.motherboard || '',
+      build.components.psu || '',
+      build.components.case || '',
+      build.components.cooling || '',
+      build.os || '',
+      build.warranty || '',
+      build.wifi || '',
+      build.buildTier || '',
+      build.condition ?? '',
+      build.stockStatus ?? '',
+      build.stockQuantity || '',
+      build.description || '',
+    ]
+      .map(escapeCell)
+      .join(',')
+  );
 
   return [headers.join(','), ...rows].join('\n');
 }

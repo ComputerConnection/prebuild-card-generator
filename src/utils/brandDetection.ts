@@ -23,7 +23,10 @@ export const BRAND_PATTERNS: { brand: string; patterns: RegExp[] }[] = [
   { brand: 'Cooler Master', patterns: [/\bcooler\s*master\b/i, /\bhyper\s*\d{3}\b/i] },
   { brand: 'NZXT', patterns: [/\bnzxt\b/i, /\bkraken\b/i] },
   { brand: 'Lian Li', patterns: [/\blian\s*li\b/i, /\blancool\b/i, /\bo11\b/i] },
-  { brand: 'Fractal Design', patterns: [/\bfractal\b/i, /\bmeshify\b/i, /\btorrent\b/i, /\bnorth\b/i] },
+  {
+    brand: 'Fractal Design',
+    patterns: [/\bfractal\b/i, /\bmeshify\b/i, /\btorrent\b/i, /\bnorth\b/i],
+  },
   { brand: 'Phanteks', patterns: [/\bphanteks\b/i, /\beclipse\b/i, /\benthoo\b/i] },
   { brand: 'Thermaltake', patterns: [/\bthermaltake\b/i, /\btoughram\b/i] },
   { brand: 'SilverStone', patterns: [/\bsilverstone\b/i] },
@@ -63,14 +66,12 @@ export function findBrandIcon(value: string, brandIcons: BrandIcon[]): BrandIcon
   const brand = detectBrand(value);
   if (!brand) return null;
 
-  return brandIcons.find(icon =>
-    icon.name.toLowerCase() === brand.toLowerCase()
-  ) || null;
+  return brandIcons.find((icon) => icon.name.toLowerCase() === brand.toLowerCase()) || null;
 }
 
 /**
  * Get list of all known brand names for the UI
  */
 export function getAllBrandNames(): string[] {
-  return BRAND_PATTERNS.map(b => b.brand).sort();
+  return BRAND_PATTERNS.map((b) => b.brand).sort();
 }

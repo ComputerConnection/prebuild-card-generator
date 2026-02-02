@@ -35,7 +35,10 @@ vi.mock('../../../utils/logger', () => ({
 }));
 
 // Create a mock jsPDF class that tracks method calls
-const mockJsPDF = vi.fn().mockImplementation(function(this: Record<string, unknown>, options?: { orientation?: string; unit?: string; format?: string | [number, number] }) {
+const mockJsPDF = vi.fn().mockImplementation(function (
+  this: Record<string, unknown>,
+  options?: { orientation?: string; unit?: string; format?: string | [number, number] }
+) {
   // Store page dimensions
   let pageWidth = 8.5;
   let pageHeight = 11;
@@ -132,8 +135,14 @@ function createTestConfig(overrides: Partial<PrebuildConfig> = {}): PrebuildConf
     colorTheme: 'gaming',
     customColors: { primary: '#dc2626', accent: '#1f2937', priceColor: '#dc2626' },
     componentPrices: {
-      cpu: 400, gpu: 600, ram: 150, storage: 100,
-      motherboard: 300, psu: 120, case: 100, cooling: 90,
+      cpu: 400,
+      gpu: 600,
+      ram: 150,
+      storage: 100,
+      motherboard: 300,
+      psu: 120,
+      case: 100,
+      cooling: 90,
     },
     showComponentPrices: false,
     stockStatus: 'in_stock',
@@ -531,7 +540,7 @@ describe('pdfGenerator', () => {
       const { generatePriceCard } = await getGenerators();
       const config = createTestConfig({
         modelName: 'PC Build - "Special" Edition & More!',
-        storeName: 'Store\'s <Best> Deals 100%',
+        storeName: "Store's <Best> Deals 100%",
         sku: 'SKU-123/ABC_456+789',
       });
 
@@ -568,7 +577,13 @@ describe('pdfGenerator', () => {
 
     it('should handle all condition types', async () => {
       const { generatePriceCard } = await getGenerators();
-      const conditions = ['new', 'preowned', 'refurbished', 'open_box', 'certified_preowned'] as const;
+      const conditions = [
+        'new',
+        'preowned',
+        'refurbished',
+        'open_box',
+        'certified_preowned',
+      ] as const;
 
       for (const condition of conditions) {
         const config = createTestConfig({ condition });

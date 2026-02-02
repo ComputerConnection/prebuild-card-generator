@@ -91,8 +91,7 @@ export const useUIStore = create<UIState>()(
       // PDF progress
       pdfProgress: 0,
       pdfStatus: '',
-      setPdfProgress: (progress, status = '') =>
-        set({ pdfProgress: progress, pdfStatus: status }),
+      setPdfProgress: (progress, status = '') => set({ pdfProgress: progress, pdfStatus: status }),
 
       // Collapsible panels
       panels: defaultPanels,

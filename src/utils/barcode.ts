@@ -4,12 +4,15 @@ import { logger } from './logger';
 /**
  * Generate barcode as data URL
  */
-export function generateBarcodeDataUrl(text: string, options?: {
-  format?: string;
-  width?: number;
-  height?: number;
-  displayValue?: boolean;
-}): string {
+export function generateBarcodeDataUrl(
+  text: string,
+  options?: {
+    format?: string;
+    width?: number;
+    height?: number;
+    displayValue?: boolean;
+  }
+): string {
   if (!text) {
     logger.debug('Barcode', 'Skipping barcode generation - no text provided');
     return '';
@@ -25,7 +28,10 @@ export function generateBarcodeDataUrl(text: string, options?: {
       fontSize: 12,
       margin: 5,
     });
-    logger.debug('Barcode', 'Successfully generated barcode', { text, format: options?.format || 'CODE128' });
+    logger.debug('Barcode', 'Successfully generated barcode', {
+      text,
+      format: options?.format || 'CODE128',
+    });
     return canvas.toDataURL('image/png');
   } catch (err) {
     logger.error('Barcode', 'Failed to generate barcode', err);

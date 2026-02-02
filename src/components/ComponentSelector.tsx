@@ -38,9 +38,7 @@ export function ComponentSelector({ label, value, options, onChange }: Component
 
   return (
     <div className="mb-3">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {displayIsCustom ? (
         <div className="flex gap-2">
           <input

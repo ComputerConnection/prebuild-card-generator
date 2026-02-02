@@ -134,7 +134,8 @@ export const ComponentsForm = memo(function ComponentsForm() {
         </div>
       </div>
       <p className="text-xs text-gray-500 mb-3">
-        Use dropdowns to browse by brand, or click &quot;+&quot; to add new components to your library.
+        Use dropdowns to browse by brand, or click &quot;+&quot; to add new components to your
+        library.
       </p>
       {config.showComponentPrices && (
         <div className="mb-3 p-2 bg-gray-50 rounded-md text-sm text-gray-600">

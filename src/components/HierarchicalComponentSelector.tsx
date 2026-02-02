@@ -54,7 +54,12 @@ export function HierarchicalComponentSelector({
 
   const brands = getBrandsForCategory(library, category);
   const modelLines = selectedBrand ? getModelLinesForBrand(library, category, selectedBrand) : [];
-  const components = getComponents(library, category, selectedBrand || undefined, selectedModelLine || undefined);
+  const components = getComponents(
+    library,
+    category,
+    selectedBrand || undefined,
+    selectedModelLine || undefined
+  );
 
   const handleBrandChange = (brand: string) => {
     setSelectedBrand(brand);
@@ -124,7 +129,9 @@ export function HierarchicalComponentSelector({
       {/* Quick Add Form */}
       {showAddForm && (
         <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-xs font-medium text-green-800 mb-2">Add New {COMPONENT_LABELS[category]}</p>
+          <p className="text-xs font-medium text-green-800 mb-2">
+            Add New {COMPONENT_LABELS[category]}
+          </p>
           <div className="grid grid-cols-3 gap-2 mb-2">
             <input
               type="text"
@@ -135,7 +142,9 @@ export function HierarchicalComponentSelector({
               list={`brands-${category}`}
             />
             <datalist id={`brands-${category}`}>
-              {brands.map(b => <option key={b} value={b} />)}
+              {brands.map((b) => (
+                <option key={b} value={b} />
+              ))}
             </datalist>
             <input
               type="text"
@@ -146,9 +155,10 @@ export function HierarchicalComponentSelector({
               list={`modellines-${category}`}
             />
             <datalist id={`modellines-${category}`}>
-              {customBrand && getModelLinesForBrand(library, category, customBrand).map(ml => (
-                <option key={ml} value={ml} />
-              ))}
+              {customBrand &&
+                getModelLinesForBrand(library, category, customBrand).map((ml) => (
+                  <option key={ml} value={ml} />
+                ))}
             </datalist>
             <input
               type="text"
@@ -202,8 +212,10 @@ export function HierarchicalComponentSelector({
               className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
             >
               <option value="">All Brands</option>
-              {brands.map(brand => (
-                <option key={brand} value={brand}>{brand}</option>
+              {brands.map((brand) => (
+                <option key={brand} value={brand}>
+                  {brand}
+                </option>
               ))}
             </select>
 
@@ -214,8 +226,10 @@ export function HierarchicalComponentSelector({
               className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white disabled:bg-gray-100 disabled:text-gray-400"
             >
               <option value="">All Models</option>
-              {modelLines.map(ml => (
-                <option key={ml} value={ml}>{ml}</option>
+              {modelLines.map((ml) => (
+                <option key={ml} value={ml}>
+                  {ml}
+                </option>
               ))}
             </select>
           </div>
@@ -227,18 +241,18 @@ export function HierarchicalComponentSelector({
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           >
             <option value="">Select {COMPONENT_LABELS[category]}...</option>
-            {components.map(comp => (
-              <option key={comp.id} value={comp.fullName}>{comp.fullName}</option>
+            {components.map((comp) => (
+              <option key={comp.id} value={comp.fullName}>
+                {comp.fullName}
+              </option>
             ))}
           </select>
         </div>
       )}
 
       {/* Current value display if set but not in dropdown */}
-      {value && mode === 'browse' && !components.some(c => c.fullName === value) && (
-        <p className="text-xs text-amber-600 mt-1">
-          Custom: {value}
-        </p>
+      {value && mode === 'browse' && !components.some((c) => c.fullName === value) && (
+        <p className="text-xs text-amber-600 mt-1">Custom: {value}</p>
       )}
 
       {/* Price input */}

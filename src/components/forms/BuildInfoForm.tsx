@@ -14,27 +14,33 @@ export function BuildInfoForm() {
   const [errors, setErrors] = useState<{ price?: string; sku?: string }>({});
   const baseId = useId();
 
-  const handlePriceChange = useCallback((value: string) => {
-    const price = parsePrice(value);
-    setConfig({ price });
-    const validation = validatePrice(price);
-    setErrors(prev => ({ ...prev, price: validation.error }));
-  }, [setConfig]);
+  const handlePriceChange = useCallback(
+    (value: string) => {
+      const price = parsePrice(value);
+      setConfig({ price });
+      const validation = validatePrice(price);
+      setErrors((prev) => ({ ...prev, price: validation.error }));
+    },
+    [setConfig]
+  );
 
   const handlePriceBlur = useCallback(() => {
     const validation = validatePrice(config.price);
-    setErrors(prev => ({ ...prev, price: validation.error }));
+    setErrors((prev) => ({ ...prev, price: validation.error }));
   }, [config.price]);
 
-  const handleSkuChange = useCallback((value: string) => {
-    setConfig({ sku: value });
-    const validation = validateSku(value);
-    setErrors(prev => ({ ...prev, sku: validation.error }));
-  }, [setConfig]);
+  const handleSkuChange = useCallback(
+    (value: string) => {
+      setConfig({ sku: value });
+      const validation = validateSku(value);
+      setErrors((prev) => ({ ...prev, sku: validation.error }));
+    },
+    [setConfig]
+  );
 
   const handleSkuBlur = useCallback(() => {
     const validation = validateSku(config.sku);
-    setErrors(prev => ({ ...prev, sku: validation.error }));
+    setErrors((prev) => ({ ...prev, sku: validation.error }));
   }, [config.sku]);
 
   return (
@@ -89,20 +95,13 @@ export function BuildInfoForm() {
             />
           </div>
           {errors.price && (
-            <p
-              id={`${baseId}-price-error`}
-              className="mt-1 text-xs text-red-600"
-              role="alert"
-            >
+            <p id={`${baseId}-price-error`} className="mt-1 text-xs text-red-600" role="alert">
               {errors.price}
             </p>
           )}
         </div>
         <div>
-          <label
-            htmlFor={`${baseId}-sku`}
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor={`${baseId}-sku`} className="block text-sm font-medium text-gray-700 mb-1">
             SKU / Product Code
           </label>
           <input
@@ -119,11 +118,7 @@ export function BuildInfoForm() {
             }`}
           />
           {errors.sku && (
-            <p
-              id={`${baseId}-sku-error`}
-              className="mt-1 text-xs text-red-600"
-              role="alert"
-            >
+            <p id={`${baseId}-sku-error`} className="mt-1 text-xs text-red-600" role="alert">
               {errors.sku}
             </p>
           )}

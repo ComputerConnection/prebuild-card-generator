@@ -58,9 +58,7 @@ export const usePresetsStore = create<PresetsState>()(
 
       updatePreset: (id, updates) =>
         set((state) => ({
-          presets: state.presets.map((p) =>
-            p.id === id ? { ...p, ...updates } : p
-          ),
+          presets: state.presets.map((p) => (p.id === id ? { ...p, ...updates } : p)),
         })),
 
       deletePreset: (id) =>
@@ -83,9 +81,7 @@ export const usePresetsStore = create<PresetsState>()(
 
       movePresetToFolder: (presetId, folderId) =>
         set((state) => ({
-          presets: state.presets.map((p) =>
-            p.id === presetId ? { ...p, folder: folderId } : p
-          ),
+          presets: state.presets.map((p) => (p.id === presetId ? { ...p, folder: folderId } : p)),
         })),
 
       // Folder actions
@@ -101,9 +97,7 @@ export const usePresetsStore = create<PresetsState>()(
 
       updateFolder: (id, updates) =>
         set((state) => ({
-          folders: state.folders.map((f) =>
-            f.id === id ? { ...f, ...updates } : f
-          ),
+          folders: state.folders.map((f) => (f.id === id ? { ...f, ...updates } : f)),
         })),
 
       deleteFolder: (id, deletePresets = false) =>
@@ -111,16 +105,12 @@ export const usePresetsStore = create<PresetsState>()(
           folders: state.folders.filter((f) => f.id !== id),
           presets: deletePresets
             ? state.presets.filter((p) => p.folder !== id)
-            : state.presets.map((p) =>
-                p.folder === id ? { ...p, folder: undefined } : p
-              ),
+            : state.presets.map((p) => (p.folder === id ? { ...p, folder: undefined } : p)),
         })),
 
       // Queries
       getPresetsByFolder: (folderId) =>
-        get().presets.filter((p) =>
-          folderId ? p.folder === folderId : !p.folder
-        ),
+        get().presets.filter((p) => (folderId ? p.folder === folderId : !p.folder)),
 
       getPresetById: (id) => get().presets.find((p) => p.id === id),
 

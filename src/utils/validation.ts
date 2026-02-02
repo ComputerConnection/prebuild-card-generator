@@ -144,7 +144,7 @@ export function validateImageFile(file: File): ValidationResult {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: `Invalid image type. Allowed: ${ALLOWED_IMAGE_TYPES.map(t => t.split('/')[1]).join(', ')}`
+      error: `Invalid image type. Allowed: ${ALLOWED_IMAGE_TYPES.map((t) => t.split('/')[1]).join(', ')}`,
     };
   }
 
@@ -217,5 +217,5 @@ export interface FormErrors {
 }
 
 export function hasValidationErrors(errors: FormErrors): boolean {
-  return Object.values(errors).some(error => error !== undefined);
+  return Object.values(errors).some((error) => error !== undefined);
 }

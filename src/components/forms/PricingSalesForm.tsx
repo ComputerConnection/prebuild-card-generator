@@ -5,7 +5,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useConfigStore } from '../../stores';
 import { saleBadgeOptions, financingTermOptions } from '../../data/componentOptions';
-import { calculateMonthlyPayment, calculateDiscountPercent, formatPriceForInput, parsePrice } from '../../types';
+import {
+  calculateMonthlyPayment,
+  calculateDiscountPercent,
+  formatPriceForInput,
+  parsePrice,
+} from '../../types';
 import { validateSalePrice, validateApr } from '../../utils/validation';
 
 interface FormErrors {
@@ -21,31 +26,37 @@ export function PricingSalesForm() {
   useEffect(() => {
     if (config.saleInfo.enabled && config.saleInfo.originalPrice > 0 && config.price > 0) {
       const validation = validateSalePrice(config.saleInfo.originalPrice, config.price);
-      setErrors(prev => ({ ...prev, originalPrice: validation.error }));
+      setErrors((prev) => ({ ...prev, originalPrice: validation.error }));
     } else {
-      setErrors(prev => ({ ...prev, originalPrice: undefined }));
+      setErrors((prev) => ({ ...prev, originalPrice: undefined }));
     }
   }, [config.saleInfo.enabled, config.saleInfo.originalPrice, config.price]);
 
-  const handleOriginalPriceChange = useCallback((value: string) => {
-    const originalPrice = parsePrice(value);
-    setConfig({
-      saleInfo: { ...config.saleInfo, originalPrice },
-    });
-  }, [config.saleInfo, setConfig]);
+  const handleOriginalPriceChange = useCallback(
+    (value: string) => {
+      const originalPrice = parsePrice(value);
+      setConfig({
+        saleInfo: { ...config.saleInfo, originalPrice },
+      });
+    },
+    [config.saleInfo, setConfig]
+  );
 
-  const handleAprChange = useCallback((value: string) => {
-    const apr = parseFloat(value) || 0;
-    setConfig({
-      financingInfo: { ...config.financingInfo, apr },
-    });
-    const validation = validateApr(apr);
-    setErrors(prev => ({ ...prev, apr: validation.error }));
-  }, [config.financingInfo, setConfig]);
+  const handleAprChange = useCallback(
+    (value: string) => {
+      const apr = parseFloat(value) || 0;
+      setConfig({
+        financingInfo: { ...config.financingInfo, apr },
+      });
+      const validation = validateApr(apr);
+      setErrors((prev) => ({ ...prev, apr: validation.error }));
+    },
+    [config.financingInfo, setConfig]
+  );
 
   const handleAprBlur = useCallback(() => {
     const validation = validateApr(config.financingInfo.apr);
-    setErrors(prev => ({ ...prev, apr: validation.error }));
+    setErrors((prev) => ({ ...prev, apr: validation.error }));
   }, [config.financingInfo.apr]);
 
   return (
@@ -88,14 +99,18 @@ export function PricingSalesForm() {
               </div>
               {errors.originalPrice ? (
                 <p className="text-sm text-red-600 mt-1">{errors.originalPrice}</p>
-              ) : config.saleInfo.originalPrice > 0 && config.price > 0 && config.saleInfo.originalPrice > config.price ? (
+              ) : config.saleInfo.originalPrice > 0 &&
+                config.price > 0 &&
+                config.saleInfo.originalPrice > config.price ? (
                 <p className="text-sm text-green-600 mt-1">
                   {calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% off
                 </p>
               ) : null}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sale Badge Text</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sale Badge Text
+              </label>
               <select
                 value={config.saleInfo.badgeText}
                 onChange={(e) =>
@@ -167,12 +182,12 @@ export function PricingSalesForm() {
                   errors.apr ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.apr && (
-                <p className="mt-1 text-xs text-red-600">{errors.apr}</p>
-              )}
+              {errors.apr && <p className="mt-1 text-xs text-red-600">{errors.apr}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Payment</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Monthly Payment
+              </label>
               <div className="px-3 py-2 bg-gray-100 rounded-md text-gray-800 font-medium">
                 $
                 {calculateMonthlyPayment(

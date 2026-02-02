@@ -13,14 +13,17 @@ import {
   getAccessibleTextColor,
 } from '../../utils/colorContrast';
 
-const THEME_OPTIONS: { value: ColorTheme; label: string; colors: { primary: string; accent: string } }[] =
-  [
-    { value: 'minimal', label: 'Minimal', colors: THEME_PRESETS.minimal },
-    { value: 'gaming', label: 'Gaming', colors: THEME_PRESETS.gaming },
-    { value: 'workstation', label: 'Workstation', colors: THEME_PRESETS.workstation },
-    { value: 'budget', label: 'Budget', colors: THEME_PRESETS.budget },
-    { value: 'custom', label: 'Custom', colors: { primary: '#6366f1', accent: '#1e1b4b' } },
-  ];
+const THEME_OPTIONS: {
+  value: ColorTheme;
+  label: string;
+  colors: { primary: string; accent: string };
+}[] = [
+  { value: 'minimal', label: 'Minimal', colors: THEME_PRESETS.minimal },
+  { value: 'gaming', label: 'Gaming', colors: THEME_PRESETS.gaming },
+  { value: 'workstation', label: 'Workstation', colors: THEME_PRESETS.workstation },
+  { value: 'budget', label: 'Budget', colors: THEME_PRESETS.budget },
+  { value: 'custom', label: 'Custom', colors: { primary: '#6366f1', accent: '#1e1b4b' } },
+];
 
 interface ContrastInfo {
   ratio: number;
@@ -29,7 +32,11 @@ interface ContrastInfo {
   description: string;
 }
 
-function ContrastWarning({ color, label, backgroundColors }: {
+function ContrastWarning({
+  color,
+  label,
+  backgroundColors,
+}: {
   color: string;
   label: string;
   backgroundColors: { name: string; hex: string }[];
@@ -66,7 +73,8 @@ function ContrastWarning({ color, label, backgroundColors }: {
             />
           </svg>
           <span>
-            {label} on {warning.background}: {formatContrastRatio(warning.info.ratio)} ({warning.info.label})
+            {label} on {warning.background}: {formatContrastRatio(warning.info.ratio)} (
+            {warning.info.label})
           </span>
         </p>
       ))}
@@ -114,11 +122,7 @@ export function ColorThemeSelector() {
       <h2 className="text-lg font-semibold text-gray-800 mb-3" id={`${baseId}-heading`}>
         Color Theme
       </h2>
-      <div
-        className="flex flex-wrap gap-2"
-        role="radiogroup"
-        aria-labelledby={`${baseId}-heading`}
-      >
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={`${baseId}-heading`}>
         {THEME_OPTIONS.map((theme) => (
           <button
             key={theme.value}
@@ -132,14 +136,8 @@ export function ColorThemeSelector() {
             }`}
           >
             <div className="flex gap-1" aria-hidden="true">
-              <div
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: theme.colors.primary }}
-              />
-              <div
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: theme.colors.accent }}
-              />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: theme.colors.primary }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: theme.colors.accent }} />
             </div>
             <span className="text-sm font-medium">{theme.label}</span>
           </button>
@@ -178,9 +176,7 @@ export function ColorThemeSelector() {
               <ContrastWarning
                 color={config.customColors.primary}
                 label="Primary"
-                backgroundColors={[
-                  { name: 'white', hex: '#ffffff' },
-                ]}
+                backgroundColors={[{ name: 'white', hex: '#ffffff' }]}
               />
             </div>
             <div>
@@ -211,9 +207,7 @@ export function ColorThemeSelector() {
               <ContrastWarning
                 color={config.customColors.accent}
                 label="Accent"
-                backgroundColors={[
-                  { name: 'white', hex: '#ffffff' },
-                ]}
+                backgroundColors={[{ name: 'white', hex: '#ffffff' }]}
               />
             </div>
             <div>
@@ -244,9 +238,7 @@ export function ColorThemeSelector() {
               <ContrastWarning
                 color={config.customColors.priceColor}
                 label="Price"
-                backgroundColors={[
-                  { name: 'white', hex: '#ffffff' },
-                ]}
+                backgroundColors={[{ name: 'white', hex: '#ffffff' }]}
               />
             </div>
           </div>
@@ -273,10 +265,7 @@ export function ColorThemeSelector() {
               >
                 Accent Text
               </div>
-              <span
-                className="text-lg font-bold"
-                style={{ color: config.customColors.priceColor }}
-              >
+              <span className="text-lg font-bold" style={{ color: config.customColors.priceColor }}>
                 $1,299
               </span>
             </div>

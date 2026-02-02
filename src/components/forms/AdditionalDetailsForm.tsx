@@ -3,7 +3,12 @@
  */
 
 import { useConfigStore } from '../../stores';
-import { osOptions, warrantyOptions, wifiOptions, featureOptions } from '../../data/componentOptions';
+import {
+  osOptions,
+  warrantyOptions,
+  wifiOptions,
+  featureOptions,
+} from '../../data/componentOptions';
 
 export function AdditionalDetailsForm() {
   const { config, setConfig, toggleFeature } = useConfigStore();

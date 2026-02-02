@@ -41,7 +41,9 @@ export function Header() {
       });
 
       if (builds.length > 1) {
-        alert(`Imported ${builds.length} builds. First build loaded. Save as presets to keep the others.`);
+        alert(
+          `Imported ${builds.length} builds. First build loaded. Save as presets to keep the others.`
+        );
       }
     },
     [config, setConfig]
@@ -126,7 +128,9 @@ export function Header() {
             components: { ...config.components, ...builds[0].components },
           });
 
-          alert(`Imported ${builds.length} build(s). First build loaded. Save as presets to keep others.`);
+          alert(
+            `Imported ${builds.length} build(s). First build loaded. Save as presets to keep others.`
+          );
         } catch (err) {
           console.error('CSV import error:', err);
           alert('Failed to parse CSV file');

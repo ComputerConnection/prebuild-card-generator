@@ -48,20 +48,23 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
     }
   }, [sku]);
 
-  const handleQrUrlChange = useCallback((url: string) => {
-    onChange({ ...settings, qrCodeUrl: url });
-    if (url) {
-      const validation = validateUrl(url);
-      setErrors(prev => ({ ...prev, qrCodeUrl: validation.error }));
-    } else {
-      setErrors(prev => ({ ...prev, qrCodeUrl: undefined }));
-    }
-  }, [settings, onChange]);
+  const handleQrUrlChange = useCallback(
+    (url: string) => {
+      onChange({ ...settings, qrCodeUrl: url });
+      if (url) {
+        const validation = validateUrl(url);
+        setErrors((prev) => ({ ...prev, qrCodeUrl: validation.error }));
+      } else {
+        setErrors((prev) => ({ ...prev, qrCodeUrl: undefined }));
+      }
+    },
+    [settings, onChange]
+  );
 
   const handleQrUrlBlur = useCallback(() => {
     if (settings.qrCodeUrl) {
       const validation = validateUrl(settings.qrCodeUrl);
-      setErrors(prev => ({ ...prev, qrCodeUrl: validation.error }));
+      setErrors((prev) => ({ ...prev, qrCodeUrl: validation.error }));
     }
   }, [settings.qrCodeUrl]);
 
@@ -72,10 +75,10 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
     // Validate file before reading
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setErrors(prev => ({ ...prev, productImage: validation.error }));
+      setErrors((prev) => ({ ...prev, productImage: validation.error }));
       return;
     }
-    setErrors(prev => ({ ...prev, productImage: undefined }));
+    setErrors((prev) => ({ ...prev, productImage: undefined }));
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -97,9 +100,7 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between text-left"
       >
-        <h2 className="text-lg font-semibold text-gray-800">
-          Visual Settings
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-800">Visual Settings</h2>
         <svg
           className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
@@ -114,9 +115,7 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
         <div className="mt-4 space-y-4">
           {/* Card Template */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Card Template
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Card Template</label>
             <div className="grid grid-cols-2 gap-2">
               {(Object.keys(CARD_TEMPLATES) as CardTemplate[]).map((template) => (
                 <button
@@ -159,9 +158,7 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
 
           {/* Font Family */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Font Family
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Font Family</label>
             <select
               value={settings.fontFamily}
               onChange={(e) => onChange({ ...settings, fontFamily: e.target.value as FontFamily })}
@@ -177,9 +174,7 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
 
           {/* Product Image */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Product Image
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
             <input
               ref={productImageRef}
               type="file"
@@ -214,7 +209,9 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
             {errors.productImage ? (
               <p className="text-xs text-red-600 mt-1">{errors.productImage}</p>
             ) : (
-              <p className="text-xs text-gray-500 mt-1">Shown on Price Cards and Posters (max 5MB)</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Shown on Price Cards and Posters (max 5MB)
+              </p>
             )}
           </div>
 

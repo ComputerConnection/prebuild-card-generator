@@ -129,10 +129,7 @@ describe('PrintQueueStore', () => {
       const preset1 = createMockPreset('1', 'Gaming PC');
       usePrintQueueStore.getState().addToQueue(preset1);
 
-      const presets = [
-        createMockPreset('1', 'Gaming PC'),
-        createMockPreset('2', 'Workstation'),
-      ];
+      const presets = [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')];
 
       usePrintQueueStore.getState().addMultipleToQueue(presets);
 
@@ -167,10 +164,7 @@ describe('PrintQueueStore', () => {
 
   describe('clearQueue', () => {
     it('should clear all presets from the queue', () => {
-      const presets = [
-        createMockPreset('1', 'Gaming PC'),
-        createMockPreset('2', 'Workstation'),
-      ];
+      const presets = [createMockPreset('1', 'Gaming PC'), createMockPreset('2', 'Workstation')];
 
       usePrintQueueStore.getState().addMultipleToQueue(presets);
       usePrintQueueStore.getState().clearQueue();

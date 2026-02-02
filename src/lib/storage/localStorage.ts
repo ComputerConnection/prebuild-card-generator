@@ -98,7 +98,12 @@ export function createVersionedStorage<T>(
       }
 
       // Check if it's versioned data
-      if (typeof stored === 'object' && stored !== null && 'version' in stored && 'data' in stored) {
+      if (
+        typeof stored === 'object' &&
+        stored !== null &&
+        'version' in stored &&
+        'data' in stored
+      ) {
         const versionedData = stored as VersionedData<T>;
 
         if (versionedData.version === version) {
@@ -150,12 +155,12 @@ export function createVersionedStorage<T>(
  * Maps old keys to new prefixed keys
  */
 export const legacyKeyMap: Record<string, string> = {
-  'prebuildPresets': 'presets',
-  'prebuildPresetFolders': 'preset-folders',
-  'customBrandIcons': 'brand-icons',
-  'storeProfiles': 'store-profiles',
-  'activeStoreId': 'active-store-id',
-  'customComponentLibrary': 'component-library',
+  prebuildPresets: 'presets',
+  prebuildPresetFolders: 'preset-folders',
+  customBrandIcons: 'brand-icons',
+  storeProfiles: 'store-profiles',
+  activeStoreId: 'active-store-id',
+  customComponentLibrary: 'component-library',
 };
 
 /**

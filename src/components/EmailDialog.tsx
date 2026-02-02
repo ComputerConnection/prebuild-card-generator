@@ -60,21 +60,23 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
     if (isOpen && config) {
       const storeName = config.storeName || 'PC Builder';
       setSubject(`${storeName} - ${config.modelName || 'PC Build'} Spec Card`);
-      setMessage(generateEmailBody(
-        config.modelName || 'PC Build',
-        config.price > 0 ? formatPrice(config.price) : '',
-        {
-          cpu: config.components.cpu,
-          gpu: config.components.gpu,
-          ram: config.components.ram,
-          storage: config.components.storage,
-          motherboard: config.components.motherboard,
-          psu: config.components.psu,
-          case: config.components.case,
-          cooling: config.components.cooling,
-        },
-        config.storeName
-      ));
+      setMessage(
+        generateEmailBody(
+          config.modelName || 'PC Build',
+          config.price > 0 ? formatPrice(config.price) : '',
+          {
+            cpu: config.components.cpu,
+            gpu: config.components.gpu,
+            ram: config.components.ram,
+            storage: config.components.storage,
+            motherboard: config.components.motherboard,
+            psu: config.components.psu,
+            case: config.components.case,
+            cooling: config.components.cooling,
+          },
+          config.storeName
+        )
+      );
     }
   }, [isOpen, config]);
 
@@ -152,13 +154,13 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
         openEmailClient(toEmail, subject, message);
         setStatus({
           type: 'success',
-          message: 'Email client opened. Please attach the PDF manually after downloading.'
+          message: 'Email client opened. Please attach the PDF manually after downloading.',
         });
       }
     } catch (err) {
       setStatus({
         type: 'error',
-        message: err instanceof Error ? err.message : 'An error occurred'
+        message: err instanceof Error ? err.message : 'An error occurred',
       });
     }
 
@@ -178,12 +180,14 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800">Email Spec Card</h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -240,7 +244,16 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
               {showConfig ? (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">
-                    Configure your <a href="https://www.emailjs.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">EmailJS</a> account (free tier: 200 emails/month)
+                    Configure your{' '}
+                    <a
+                      href="https://www.emailjs.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      EmailJS
+                    </a>{' '}
+                    account (free tier: 200 emails/month)
                   </p>
                   <input
                     type="text"
@@ -325,7 +338,7 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
                 <div className="py-1">
                   <div className="px-3 py-1 text-xs text-gray-500">Recent</div>
-                  {emailHistory.map(email => (
+                  {emailHistory.map((email) => (
                     <button
                       key={email}
                       onClick={() => handleSelectHistory(email)}
@@ -364,23 +377,34 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
           {/* PDF Attachment Info */}
           {pdfDoc && (
             <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md text-sm">
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-5 h-5 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
               <span className="text-blue-700">
                 {sendMethod === 'mailto'
                   ? 'PDF will need to be attached manually'
-                  : `PDF attached: ${config.modelName || 'prebuild'}-${cardSize}.pdf`
-                }
+                  : `PDF attached: ${config.modelName || 'prebuild'}-${cardSize}.pdf`}
               </span>
             </div>
           )}
 
           {/* Status Message */}
           {status && (
-            <div className={`p-3 rounded-md text-sm ${
-              status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}>
+            <div
+              className={`p-3 rounded-md text-sm ${
+                status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}
+            >
               {status.message}
             </div>
           )}
@@ -401,17 +425,37 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
             {loading ? (
               <>
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Sending...
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
                 </svg>
-                {sendMethod === 'mailto' ? 'Open Email' : sendMethod === 'share' ? 'Share' : 'Send Email'}
+                {sendMethod === 'mailto'
+                  ? 'Open Email'
+                  : sendMethod === 'share'
+                    ? 'Share'
+                    : 'Send Email'}
               </>
             )}
           </button>

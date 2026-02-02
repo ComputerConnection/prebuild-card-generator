@@ -33,40 +33,43 @@ export const CATEGORY_BRANDS: Record<ComponentCategory, string[]> = {
 // Model lines by brand for smart suggestions
 export const BRAND_MODEL_LINES: Record<string, string[]> = {
   // CPUs
-  'Intel': ['Core i9', 'Core i7', 'Core i5', 'Core i3'],
-  'AMD': ['Ryzen 9', 'Ryzen 7', 'Ryzen 5', 'Ryzen 3'],
+  Intel: ['Core i9', 'Core i7', 'Core i5', 'Core i3'],
+  AMD: ['Ryzen 9', 'Ryzen 7', 'Ryzen 5', 'Ryzen 3'],
   // GPUs
-  'NVIDIA': ['RTX 50 Series', 'RTX 40 Series', 'RTX 30 Series'],
+  NVIDIA: ['RTX 50 Series', 'RTX 40 Series', 'RTX 30 Series'],
   // RAM
-  'Corsair': ['Vengeance', 'Dominator'],
+  Corsair: ['Vengeance', 'Dominator'],
   'G.Skill': ['Trident Z5', 'Trident Z', 'Ripjaws'],
-  'Kingston': ['Fury Beast', 'Fury Renegade'],
+  Kingston: ['Fury Beast', 'Fury Renegade'],
   // Storage
-  'Samsung': ['990 Pro', '980 Pro', '970 EVO', '870 EVO'],
+  Samsung: ['990 Pro', '980 Pro', '970 EVO', '870 EVO'],
   'Western Digital': ['Black SN850X', 'Black SN770', 'Blue SN580'],
-  'Seagate': ['FireCuda', 'Barracuda'],
-  'Crucial': ['T700', 'P5 Plus', 'MX500'],
+  Seagate: ['FireCuda', 'Barracuda'],
+  Crucial: ['T700', 'P5 Plus', 'MX500'],
   // Motherboards
-  'ASUS': ['ROG Maximus', 'ROG Strix', 'TUF Gaming', 'Prime', 'ProArt'],
-  'MSI': ['MEG', 'MPG', 'MAG', 'Pro'],
-  'Gigabyte': ['Aorus Master', 'Aorus Elite', 'Gaming X', 'UD'],
-  'ASRock': ['Taichi', 'Steel Legend', 'Phantom Gaming', 'Pro'],
+  ASUS: ['ROG Maximus', 'ROG Strix', 'TUF Gaming', 'Prime', 'ProArt'],
+  MSI: ['MEG', 'MPG', 'MAG', 'Pro'],
+  Gigabyte: ['Aorus Master', 'Aorus Elite', 'Gaming X', 'UD'],
+  ASRock: ['Taichi', 'Steel Legend', 'Phantom Gaming', 'Pro'],
   // PSUs
-  'Seasonic': ['Prime', 'Focus', 'Vertex'],
+  Seasonic: ['Prime', 'Focus', 'Vertex'],
   // Cases
   'Lian Li': ['O11 Dynamic', 'Lancool', 'A4-H2O'],
-  'NZXT': ['H9', 'H7', 'H5', 'H1'],
+  NZXT: ['H9', 'H7', 'H5', 'H1'],
   'Fractal Design': ['Torrent', 'North', 'Meshify', 'Define'],
   // Cooling
-  'Noctua': ['NH-D15', 'NH-U12', 'NH-L9'],
+  Noctua: ['NH-D15', 'NH-U12', 'NH-L9'],
   'be quiet!': ['Dark Rock', 'Pure Rock', 'Silent Loop'],
-  'Arctic': ['Liquid Freezer', 'Freezer'],
+  Arctic: ['Liquid Freezer', 'Freezer'],
 };
 
 /**
  * Parse a component string into structured data
  */
-export function parseComponentString(fullName: string, category: ComponentCategory): Partial<ComponentEntry> {
+export function parseComponentString(
+  fullName: string,
+  category: ComponentCategory
+): Partial<ComponentEntry> {
   const brands = CATEGORY_BRANDS[category] || [];
   let brand = '';
   let modelLine = '';
@@ -185,7 +188,7 @@ export function addComponent(
 
   // Check for duplicates
   const exists = library.components.some(
-    c => c.category === category && c.fullName.toLowerCase() === fullName.toLowerCase()
+    (c) => c.category === category && c.fullName.toLowerCase() === fullName.toLowerCase()
   );
 
   if (exists) {
@@ -214,23 +217,26 @@ export function addComponent(
 export function removeComponent(library: ComponentLibrary, id: string): ComponentLibrary {
   return {
     ...library,
-    components: library.components.filter(c => c.id !== id),
+    components: library.components.filter((c) => c.id !== id),
   };
 }
 
 /**
  * Get all unique brands for a category
  */
-export function getBrandsForCategory(library: ComponentLibrary, category: ComponentCategory): string[] {
+export function getBrandsForCategory(
+  library: ComponentLibrary,
+  category: ComponentCategory
+): string[] {
   const brands = new Set<string>();
 
   // Add known brands first
-  CATEGORY_BRANDS[category]?.forEach(b => brands.add(b));
+  CATEGORY_BRANDS[category]?.forEach((b) => brands.add(b));
 
   // Add brands from library
   library.components
-    .filter(c => c.category === category && c.brand)
-    .forEach(c => brands.add(c.brand));
+    .filter((c) => c.category === category && c.brand)
+    .forEach((c) => brands.add(c.brand));
 
   return Array.from(brands).sort();
 }
@@ -246,12 +252,12 @@ export function getModelLinesForBrand(
   const modelLines = new Set<string>();
 
   // Add known model lines first
-  BRAND_MODEL_LINES[brand]?.forEach(ml => modelLines.add(ml));
+  BRAND_MODEL_LINES[brand]?.forEach((ml) => modelLines.add(ml));
 
   // Add model lines from library
   library.components
-    .filter(c => c.category === category && c.brand === brand && c.modelLine)
-    .forEach(c => modelLines.add(c.modelLine));
+    .filter((c) => c.category === category && c.brand === brand && c.modelLine)
+    .forEach((c) => modelLines.add(c.modelLine));
 
   return Array.from(modelLines).sort();
 }
@@ -265,7 +271,7 @@ export function getComponents(
   brand?: string,
   modelLine?: string
 ): ComponentEntry[] {
-  return library.components.filter(c => {
+  return library.components.filter((c) => {
     if (c.category !== category) return false;
     if (brand && c.brand !== brand) return false;
     if (modelLine && c.modelLine !== modelLine) return false;
@@ -276,10 +282,13 @@ export function getComponents(
 /**
  * Get all components for a category (flat list of full names)
  */
-export function getComponentOptions(library: ComponentLibrary, category: ComponentCategory): string[] {
+export function getComponentOptions(
+  library: ComponentLibrary,
+  category: ComponentCategory
+): string[] {
   return library.components
-    .filter(c => c.category === category)
-    .map(c => c.fullName)
+    .filter((c) => c.category === category)
+    .map((c) => c.fullName)
     .sort();
 }
 
@@ -308,7 +317,9 @@ export function importLibrary(json: string): ComponentLibrary | null {
 /**
  * Create initial library from legacy options
  */
-export function createInitialLibrary(legacyOptions: Record<ComponentCategory, string[]>): ComponentLibrary {
+export function createInitialLibrary(
+  legacyOptions: Record<ComponentCategory, string[]>
+): ComponentLibrary {
   return {
     version: LIBRARY_VERSION,
     components: convertLegacyOptions(legacyOptions),

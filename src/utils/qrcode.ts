@@ -30,7 +30,10 @@ export async function generateQRCodeDataUrl(text: string, size: number = 128): P
 /**
  * Generate QR code as canvas for PDF embedding
  */
-export async function generateQRCodeCanvas(text: string, size: number = 128): Promise<HTMLCanvasElement | null> {
+export async function generateQRCodeCanvas(
+  text: string,
+  size: number = 128
+): Promise<HTMLCanvasElement | null> {
   if (!text) {
     logger.debug('QRCode', 'Skipping QR code canvas generation - no text provided');
     return null;
@@ -46,7 +49,10 @@ export async function generateQRCodeCanvas(text: string, size: number = 128): Pr
         light: '#ffffff',
       },
     });
-    logger.debug('QRCode', 'Successfully generated QR code canvas', { textLength: text.length, size });
+    logger.debug('QRCode', 'Successfully generated QR code canvas', {
+      textLength: text.length,
+      size,
+    });
     return canvas;
   } catch (err) {
     logger.error('QRCode', 'Failed to generate QR code canvas', err);

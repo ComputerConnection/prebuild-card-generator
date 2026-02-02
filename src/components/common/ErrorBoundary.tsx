@@ -63,9 +63,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       // Compact fallback for smaller components
       if (this.props.compact) {
-        return (
-          <ErrorFallbackCompact error={this.state.error} resetError={this.resetError} />
-        );
+        return <ErrorFallbackCompact error={this.state.error} resetError={this.resetError} />;
       }
 
       // Default fallback

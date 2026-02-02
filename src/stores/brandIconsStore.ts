@@ -80,8 +80,7 @@ export const useBrandIconsStore = create<BrandIconsState>()(
           icons: state.icons.map((i) => (i.name === name ? { ...i, ...updates } : i)),
         })),
 
-      getIconByName: (name) =>
-        get().icons.find((i) => i.name.toLowerCase() === name.toLowerCase()),
+      getIconByName: (name) => get().icons.find((i) => i.name.toLowerCase() === name.toLowerCase()),
 
       // Profile actions
       addProfile: (name, logo, defaultTheme) => {
@@ -144,8 +143,8 @@ export const useBrandIconsStore = create<BrandIconsState>()(
               const parsed = JSON.parse(appLegacyIcons) as BrandIcon[];
               if (Array.isArray(parsed)) {
                 // Merge with existing icons, avoiding duplicates
-                const existingNames = new Set(state.icons.map(i => i.name.toLowerCase()));
-                const newIcons = parsed.filter(i => !existingNames.has(i.name.toLowerCase()));
+                const existingNames = new Set(state.icons.map((i) => i.name.toLowerCase()));
+                const newIcons = parsed.filter((i) => !existingNames.has(i.name.toLowerCase()));
                 state.icons = [...state.icons, ...newIcons];
               }
               // Clean up legacy key

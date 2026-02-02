@@ -65,9 +65,7 @@ export const usePrintQueueStore = create<PrintQueueState>((set, get) => ({
 
   addMultipleToQueue: (presets) => {
     set((state) => {
-      const newPresets = presets.filter(
-        (p) => !state.queue.some((q) => q.id === p.id)
-      );
+      const newPresets = presets.filter((p) => !state.queue.some((q) => q.id === p.id));
       return { queue: [...state.queue, ...newPresets] };
     });
   },

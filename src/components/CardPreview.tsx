@@ -29,9 +29,22 @@ interface CardPreviewProps {
   brandIcons: BrandIcon[];
 }
 
-const COMPONENT_ORDER: ComponentCategory[] = ['cpu', 'gpu', 'ram', 'storage', 'motherboard', 'psu', 'case', 'cooling'];
+const COMPONENT_ORDER: ComponentCategory[] = [
+  'cpu',
+  'gpu',
+  'ram',
+  'storage',
+  'motherboard',
+  'psu',
+  'case',
+  'cooling',
+];
 
-export const CardPreview = memo(function CardPreview({ config, cardSize, brandIcons }: CardPreviewProps) {
+export const CardPreview = memo(function CardPreview({
+  config,
+  cardSize,
+  brandIcons,
+}: CardPreviewProps) {
   const size = CARD_SIZES[cardSize];
   const aspectRatio = size.width / size.height;
   const colors = getThemeColors(config);
@@ -47,11 +60,11 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
   const zoom = ZOOM_LEVELS[zoomIndex];
 
   const handleZoomIn = () => {
-    setZoomIndex(prev => Math.min(prev + 1, ZOOM_LEVELS.length - 1));
+    setZoomIndex((prev) => Math.min(prev + 1, ZOOM_LEVELS.length - 1));
   };
 
   const handleZoomOut = () => {
-    setZoomIndex(prev => Math.max(prev - 1, 0));
+    setZoomIndex((prev) => Math.max(prev - 1, 0));
   };
 
   const handleResetZoom = () => {
@@ -95,7 +108,12 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
   }, [visualSettings.fontFamily]);
 
   // Helper to render a spec line with optional brand icon
-  const renderSpecWithIcon = (key: ComponentCategory, value: string, iconSize: number = 12, fontSize: string = 'text-[6px]') => {
+  const renderSpecWithIcon = (
+    key: ComponentCategory,
+    value: string,
+    iconSize: number = 12,
+    fontSize: string = 'text-[6px]'
+  ) => {
     const brandIcon = findBrandIcon(value, brandIcons);
     return (
       <div key={key} className={`flex items-center gap-0.5 ${fontSize}`}>
@@ -117,14 +135,9 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
   const renderShelfTag = () => (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header bar */}
-      <div
-        className="py-1 px-2"
-        style={{ backgroundColor: colors.accent }}
-      >
+      <div className="py-1 px-2" style={{ backgroundColor: colors.accent }}>
         {config.storeName && (
-          <p className="text-[6px] text-center text-white font-bold truncate">
-            {config.storeName}
-          </p>
+          <p className="text-[6px] text-center text-white font-bold truncate">{config.storeName}</p>
         )}
       </div>
 
@@ -175,10 +188,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
               {formatPrice(config.saleInfo.originalPrice)}
             </p>
           )}
-          <p
-            className="text-base font-bold"
-            style={{ color: colors.priceColor }}
-          >
+          <p className="text-base font-bold" style={{ color: colors.priceColor }}>
             {formatPrice(config.price)}
           </p>
         </div>
@@ -198,11 +208,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
               <img src={barcodeImage} alt="Barcode" className="h-3" />
             </div>
           )}
-          {config.sku && (
-            <p className="text-[5px] text-center text-gray-400">
-              SKU: {config.sku}
-            </p>
-          )}
+          {config.sku && <p className="text-[5px] text-center text-gray-400">SKU: {config.sku}</p>}
         </div>
       </div>
     </div>
@@ -215,19 +221,14 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
       { label: 'OS', value: config.os },
       { label: 'Warranty', value: config.warranty },
       { label: 'WiFi', value: config.wifi },
-    ].filter(item => item.value);
+    ].filter((item) => item.value);
 
     return (
       <div className="h-full flex flex-col overflow-hidden">
         {/* Header bar */}
-        <div
-          className="py-1.5 px-2"
-          style={{ backgroundColor: colors.accent }}
-        >
+        <div className="py-1.5 px-2" style={{ backgroundColor: colors.accent }}>
           {config.storeName && (
-            <p className="text-[8px] text-center text-white font-bold">
-              {config.storeName}
-            </p>
+            <p className="text-[8px] text-center text-white font-bold">{config.storeName}</p>
           )}
         </div>
 
@@ -266,7 +267,10 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
             )}
             {config.saleInfo.enabled && (
               <span className="text-[6px] px-1 py-0.5 rounded bg-red-500 text-white">
-                {config.saleInfo.badgeText} {config.saleInfo.originalPrice > 0 && config.price > 0 ? `${calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% OFF` : ''}
+                {config.saleInfo.badgeText}{' '}
+                {config.saleInfo.originalPrice > 0 && config.price > 0
+                  ? `${calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% OFF`
+                  : ''}
               </span>
             )}
             {config.stockStatus && (
@@ -289,15 +293,18 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
                 {formatPrice(config.saleInfo.originalPrice)}
               </p>
             )}
-            <p
-              className="text-lg font-bold"
-              style={{ color: colors.priceColor }}
-            >
+            <p className="text-lg font-bold" style={{ color: colors.priceColor }}>
               {formatPrice(config.price)}
             </p>
             {config.financingInfo.enabled && config.price > 0 && (
               <p className="text-[6px] text-gray-600">
-                As low as ${calculateMonthlyPayment(config.price, config.financingInfo.months, config.financingInfo.apr)}/mo
+                As low as $
+                {calculateMonthlyPayment(
+                  config.price,
+                  config.financingInfo.months,
+                  config.financingInfo.apr
+                )}
+                /mo
               </p>
             )}
           </div>
@@ -318,10 +325,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
           )}
 
           {/* Specs section with background */}
-          <div
-            className="flex-1 rounded p-1 relative"
-            style={{ backgroundColor: '#f8f8f8' }}
-          >
+          <div className="flex-1 rounded p-1 relative" style={{ backgroundColor: '#f8f8f8' }}>
             {/* Left accent bar */}
             <div
               className="absolute left-0 top-0 bottom-0 w-1 rounded-l"
@@ -411,13 +415,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
                   className="w-8 h-8 object-contain"
                 />
               )}
-              {qrCodeImage && (
-                <img
-                  src={qrCodeImage}
-                  alt="QR Code"
-                  className="w-8 h-8"
-                />
-              )}
+              {qrCodeImage && <img src={qrCodeImage} alt="QR Code" className="w-8 h-8" />}
             </div>
           )}
 
@@ -429,9 +427,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
               </div>
             )}
             {config.sku && (
-              <p className="text-[5px] text-gray-400 text-center">
-                SKU: {config.sku}
-              </p>
+              <p className="text-[5px] text-gray-400 text-center">SKU: {config.sku}</p>
             )}
           </div>
         </div>
@@ -442,14 +438,9 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
   const renderPoster = () => (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header bar */}
-      <div
-        className="py-2 px-3"
-        style={{ backgroundColor: colors.accent }}
-      >
+      <div className="py-2 px-3" style={{ backgroundColor: colors.accent }}>
         {config.storeName && (
-          <p className="text-[10px] text-center text-white font-bold">
-            {config.storeName}
-          </p>
+          <p className="text-[10px] text-center text-white font-bold">{config.storeName}</p>
         )}
       </div>
 
@@ -485,7 +476,10 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
           )}
           {config.saleInfo.enabled && (
             <span className="text-[8px] px-2 py-0.5 rounded bg-red-500 text-white">
-              {config.saleInfo.badgeText} {config.saleInfo.originalPrice > 0 && config.price > 0 ? `${calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% OFF` : ''}
+              {config.saleInfo.badgeText}{' '}
+              {config.saleInfo.originalPrice > 0 && config.price > 0
+                ? `${calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% OFF`
+                : ''}
             </span>
           )}
           {config.stockStatus && (
@@ -501,9 +495,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
           )}
         </div>
 
-        <h3 className="text-sm font-bold text-center mb-1">
-          {config.modelName || 'PC Build'}
-        </h3>
+        <h3 className="text-sm font-bold text-center mb-1">{config.modelName || 'PC Build'}</h3>
 
         {/* Price section */}
         <div className="text-center mb-2">
@@ -512,15 +504,18 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
               {formatPrice(config.saleInfo.originalPrice)}
             </p>
           )}
-          <p
-            className="text-2xl font-bold"
-            style={{ color: colors.priceColor }}
-          >
+          <p className="text-2xl font-bold" style={{ color: colors.priceColor }}>
             {formatPrice(config.price)}
           </p>
           {config.financingInfo.enabled && config.price > 0 && (
             <p className="text-[8px] text-gray-600">
-              As low as ${calculateMonthlyPayment(config.price, config.financingInfo.months, config.financingInfo.apr)}/mo for {config.financingInfo.months} months
+              As low as $
+              {calculateMonthlyPayment(
+                config.price,
+                config.financingInfo.months,
+                config.financingInfo.apr
+              )}
+              /mo for {config.financingInfo.months} months
               {config.financingInfo.apr > 0 && ` @ ${config.financingInfo.apr}% APR`}
             </p>
           )}
@@ -543,10 +538,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
 
         <hr style={{ borderColor: colors.primary }} className="mb-2" />
 
-        <p
-          className="text-[8px] font-bold text-center mb-1.5"
-          style={{ color: colors.accent }}
-        >
+        <p className="text-[8px] font-bold text-center mb-1.5" style={{ color: colors.accent }}>
           SPECIFICATIONS
         </p>
 
@@ -624,11 +616,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
               )}
               {qrCodeImage && (
                 <div className="text-center">
-                  <img
-                    src={qrCodeImage}
-                    alt="QR Code"
-                    className="w-10 h-10"
-                  />
+                  <img src={qrCodeImage} alt="QR Code" className="w-10 h-10" />
                   <p className="text-[5px] text-gray-400">Scan for details</p>
                 </div>
               )}
@@ -642,11 +630,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
             </div>
           )}
 
-          {config.sku && (
-            <p className="text-[5px] text-gray-400 text-center">
-              SKU: {config.sku}
-            </p>
-          )}
+          {config.sku && <p className="text-[5px] text-gray-400 text-center">SKU: {config.sku}</p>}
         </div>
       </div>
     </div>
@@ -697,7 +681,13 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
             className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Zoom out"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
             </svg>
           </button>
@@ -714,8 +704,19 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
             className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Zoom in"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
           </button>
         </div>
@@ -723,7 +724,8 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
 
       {/* Accessible hint */}
       <p className="text-xs text-gray-500 mb-2" id={`${baseId}-hint`}>
-        Use zoom controls to enlarge the preview. Small text on printed cards may appear larger than shown.
+        Use zoom controls to enlarge the preview. Small text on printed cards may appear larger than
+        shown.
       </p>
 
       <div className="flex justify-center overflow-auto">

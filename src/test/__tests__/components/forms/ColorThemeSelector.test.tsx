@@ -2,7 +2,7 @@
  * Tests for ColorThemeSelector component
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ColorThemeSelector } from '../../../../components/forms/ColorThemeSelector';
 import { useConfigStore } from '../../../../stores';

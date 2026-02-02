@@ -16,8 +16,8 @@ const getSelectByLabel = (labelText: string) => {
   return container?.querySelector('select') as HTMLSelectElement;
 };
 
-// Helper to get input by its associated label text
-const getInputByLabel = (labelText: string) => {
+// Helper to get input by its associated label text (kept for future use)
+const _getInputByLabel = (labelText: string) => {
   const label = screen.getByText(labelText);
   const container = label.closest('div');
   return container?.querySelector('input') as HTMLInputElement;

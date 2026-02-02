@@ -12,7 +12,7 @@ import {
   shareViaWebShare,
   pdfToBase64,
 } from '../utils/emailService';
-import { PrebuildConfig } from '../types';
+import { PrebuildConfig, formatPrice } from '../types';
 
 interface EmailDialogProps {
   isOpen: boolean;
@@ -62,7 +62,7 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
       setSubject(`${storeName} - ${config.modelName || 'PC Build'} Spec Card`);
       setMessage(generateEmailBody(
         config.modelName || 'PC Build',
-        config.price || '',
+        config.price > 0 ? formatPrice(config.price) : '',
         {
           cpu: config.components.cpu,
           gpu: config.components.gpu,

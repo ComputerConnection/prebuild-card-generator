@@ -181,7 +181,7 @@ describe('validateApr', () => {
 });
 
 describe('validateImageFile', () => {
-  const createMockFile = (type: string, size: number): File => {
+  const createMockFile = (type: string, _size: number): File => {
     const blob = new Blob([''], { type });
     return new File([blob], 'test.jpg', { type }) as File;
   };

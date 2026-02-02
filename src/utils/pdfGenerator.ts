@@ -674,7 +674,7 @@ async function drawPriceCardAt(
   if (config.features.length > 0 && layout.maxFeatures > 0) {
     doc.setFontSize(layout.featureBadge.fontSize);
     const features = config.features.slice(0, layout.maxFeatures);
-    let totalW = features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) + (features.length - 1) * layout.featureBadge.spacing;
+    const totalW = features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) + (features.length - 1) * layout.featureBadge.spacing;
     let fx = centerX - totalW / 2;
 
     for (const feature of features) {
@@ -1007,7 +1007,7 @@ export async function generatePoster(config: PrebuildConfig, brandIcons: BrandIc
   if (config.features.length > 0 && layout.maxFeatures > 0) {
     doc.setFontSize(layout.featureBadge.fontSize);
     const features = config.features.slice(0, layout.maxFeatures);
-    let totalW = features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) + (features.length - 1) * layout.featureBadge.spacing;
+    const totalW = features.reduce((sum, f) => sum + doc.getTextWidth(f) + layout.featureBadge.paddingX * 2, 0) + (features.length - 1) * layout.featureBadge.spacing;
 
     if (totalW <= contentWidth) {
       let fx = centerX - totalW / 2;

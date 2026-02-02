@@ -1,4 +1,4 @@
-import { PrebuildConfig, ComponentCategory } from '../types';
+import { PrebuildConfig, ComponentCategory, formatPrice, parsePrice } from '../types';
 import { defaultConfig, defaultComponentPrices } from '../data/componentOptions';
 
 // Extract Google Sheet ID from various URL formats
@@ -167,7 +167,8 @@ export function parseSheetData(rows: string[][]): Partial<PrebuildConfig>[] {
           'certified': 'certified_preowned',
           'certified pre-owned': 'certified_preowned',
         };
-        (build as Record<string, unknown>)[mappedField] = condMap[value.toLowerCase()] || '';
+        const mappedCondition = condMap[value.toLowerCase()];
+        (build as Record<string, unknown>)[mappedField] = mappedCondition || null;
       } else if (mappedField === 'stockStatus') {
         const stockMap: Record<string, string> = {
           'in stock': 'in_stock',
@@ -184,7 +185,10 @@ export function parseSheetData(rows: string[][]): Partial<PrebuildConfig>[] {
           'onorder': 'on_order',
           'ordered': 'on_order',
         };
-        (build as Record<string, unknown>)[mappedField] = stockMap[value.toLowerCase()] || '';
+        const mappedStatus = stockMap[value.toLowerCase()];
+        (build as Record<string, unknown>)[mappedField] = mappedStatus || null;
+      } else if (mappedField === 'price') {
+        build.price = parsePrice(value);
       } else {
         (build as Record<string, unknown>)[mappedField] = value;
       }
@@ -288,7 +292,7 @@ export function exportToCSV(builds: PrebuildConfig[]): string {
 
   const rows = builds.map(build => [
     build.modelName || '',
-    build.price || '',
+    build.price > 0 ? formatPrice(build.price, false) : '',
     build.sku || '',
     build.components.cpu || '',
     build.components.gpu || '',
@@ -302,8 +306,8 @@ export function exportToCSV(builds: PrebuildConfig[]): string {
     build.warranty || '',
     build.wifi || '',
     build.buildTier || '',
-    build.condition || '',
-    build.stockStatus || '',
+    build.condition ?? '',
+    build.stockStatus ?? '',
     build.stockQuantity || '',
     build.description || '',
   ].map(escapeCell).join(','));

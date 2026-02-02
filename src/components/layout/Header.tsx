@@ -7,6 +7,7 @@ import { useConfigStore } from '../../stores';
 import { GoogleSheetsImport } from '../GoogleSheetsImport';
 import { defaultConfig, defaultComponentPrices } from '../../data/componentOptions';
 import type { PrebuildConfig, ComponentCategory } from '../../types';
+import { parsePrice } from '../../types';
 import { SHORTCUT_LABELS } from '../../hooks/useKeyboardShortcuts';
 import { env } from '../../config/env';
 
@@ -81,7 +82,7 @@ export function Header() {
                   build.modelName = value;
                   break;
                 case 'price':
-                  build.price = value;
+                  build.price = parsePrice(value);
                   break;
                 case 'sku':
                   build.sku = value;

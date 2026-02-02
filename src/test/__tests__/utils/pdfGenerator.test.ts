@@ -154,9 +154,9 @@ function createTestConfig(overrides: Partial<PrebuildConfig> = {}): PrebuildConf
 }
 
 /**
- * Create test brand icons
+ * Create test brand icons (kept for future use)
  */
-function createTestBrandIcons(): BrandIcon[] {
+function _createTestBrandIcons(): BrandIcon[] {
   return [
     { name: 'Intel', image: 'data:image/png;base64,mockIntelIcon' },
     { name: 'AMD', image: 'data:image/png;base64,mockAMDIcon' },

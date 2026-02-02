@@ -37,7 +37,8 @@ export function generateBarcodeDataUrl(text: string, options?: {
  * Check if text is valid for barcode generation
  */
 export function isValidBarcode(text: string): boolean {
-  // CODE128 accepts most ASCII characters
+  // CODE128 accepts most ASCII characters (0x00-0x7F range)
+  // eslint-disable-next-line no-control-regex
   const isValid = text.length > 0 && text.length <= 80 && /^[\x00-\x7F]+$/.test(text);
   if (!isValid && text.length > 0) {
     logger.debug('Barcode', 'Invalid barcode text', { text, length: text.length });

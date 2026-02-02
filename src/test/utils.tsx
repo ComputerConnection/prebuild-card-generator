@@ -1,6 +1,7 @@
 /**
  * Test utilities and helpers
  */
+/* eslint-disable react-refresh/only-export-components */
 
 import { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions } from '@testing-library/react';

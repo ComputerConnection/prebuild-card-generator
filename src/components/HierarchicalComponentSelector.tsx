@@ -38,7 +38,7 @@ export function HierarchicalComponentSelector({
   const [customModel, setCustomModel] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Parse current value to set initial selections
+  // Parse current value to set initial selections (only on mount)
   useEffect(() => {
     if (value) {
       const parsed = parseComponentString(value, category);
@@ -49,6 +49,7 @@ export function HierarchicalComponentSelector({
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const brands = getBrandsForCategory(library, category);

@@ -82,7 +82,7 @@ export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImpo
               <div>
                 <h4 className="font-medium text-gray-700 mb-2">Import from Google Sheet</h4>
                 <p className="text-sm text-gray-500 mb-3">
-                  Paste the URL of a public Google Sheet. The sheet must be shared as "Anyone with the link can view".
+                  Paste the URL of a public Google Sheet. The sheet must be shared as &quot;Anyone with the link can view&quot;.
                 </p>
 
                 <input

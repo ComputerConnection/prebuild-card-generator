@@ -185,7 +185,7 @@ export const PDFExporter = memo(function PDFExporter({ config, cardSize, onCardS
                 <div className="flex-1">
                   <p className="font-medium text-gray-800">{sizeConfig.name}</p>
                   <p className="text-xs text-gray-500">
-                    {sizeConfig.width}" × {sizeConfig.height}" - {sizeConfig.description}
+                    {sizeConfig.width}&quot; × {sizeConfig.height}&quot; - {sizeConfig.description}
                   </p>
                 </div>
                 {cardSize === size && (

@@ -686,7 +686,7 @@ export const CardPreview = memo(function CardPreview({ config, cardSize, brandIc
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-gray-800" id={`${baseId}-heading`}>
-          Preview: {size.name} ({size.width}" × {size.height}")
+          Preview: {size.name} ({size.width}&quot; × {size.height}&quot;)
         </h2>
 
         {/* Zoom controls */}

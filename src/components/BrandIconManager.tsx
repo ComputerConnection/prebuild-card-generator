@@ -97,7 +97,7 @@ export const BrandIconManager = memo(function BrandIconManager() {
       {isExpanded && (
         <div id={`${baseId}-content`} className="mt-3 space-y-3">
           <p className="text-xs text-gray-500">
-            Upload PNG icons for brands. They'll auto-appear next to matching specs.
+            Upload PNG icons for brands. They&apos;ll auto-appear next to matching specs.
           </p>
 
           {/* Upload section */}

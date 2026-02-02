@@ -38,6 +38,7 @@ export const logger = {
     const entry: LogEntry = { level: 'debug', context, message, data, timestamp: new Date() };
     addToBuffer(entry);
     if (env.isDev) {
+      // eslint-disable-next-line no-console
       console.debug(formatMessage(context, message), data ?? '');
     }
   },
@@ -46,6 +47,7 @@ export const logger = {
     const entry: LogEntry = { level: 'info', context, message, data, timestamp: new Date() };
     addToBuffer(entry);
     if (env.isDev) {
+      // eslint-disable-next-line no-console
       console.info(formatMessage(context, message), data ?? '');
     }
   },

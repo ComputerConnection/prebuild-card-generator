@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Preset, PrebuildConfig, PresetFolder, DEFAULT_FOLDERS } from '../types';
+import { Preset, PrebuildConfig, PresetFolder, DEFAULT_FOLDERS, formatPrice } from '../types';
 
 interface PresetManagerProps {
   currentConfig: PrebuildConfig;
@@ -119,7 +119,7 @@ export function PresetManager({ currentConfig, onLoadPreset, onPrintQueue }: Pre
     const matchesSearch = !searchQuery ||
       preset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       preset.config.modelName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      preset.config.price?.toLowerCase().includes(searchQuery.toLowerCase());
+      (preset.config.price > 0 && formatPrice(preset.config.price).toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesFolder = activeFolder === null || preset.folder === activeFolder;
 
@@ -158,11 +158,11 @@ export function PresetManager({ currentConfig, onLoadPreset, onPrintQueue }: Pre
       <button
         onClick={() => handleLoadPreset(preset)}
         className="flex-1 text-left text-sm font-medium text-gray-700 hover:text-blue-600 truncate"
-        title={`${preset.name} - ${preset.config.price || 'No price'}`}
+        title={`${preset.name} - ${preset.config.price > 0 ? formatPrice(preset.config.price) : 'No price'}`}
       >
         {preset.name}
-        {preset.config.price && (
-          <span className="ml-2 text-xs text-gray-400">{preset.config.price}</span>
+        {preset.config.price > 0 && (
+          <span className="ml-2 text-xs text-gray-400">{formatPrice(preset.config.price)}</span>
         )}
       </button>
 
@@ -210,7 +210,7 @@ export function PresetManager({ currentConfig, onLoadPreset, onPrintQueue }: Pre
     <div className="bg-white rounded-lg shadow-md p-4" data-preset-manager>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-gray-800">Presets</h2>
-        {selectedForPrint.size > 0 && (
+        {selectedForPrint.size > 0 && onPrintQueue && (
           <button
             onClick={handlePrintSelected}
             className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700"

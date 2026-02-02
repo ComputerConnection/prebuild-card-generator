@@ -185,14 +185,14 @@ export const defaultComponents = {
 };
 
 export const defaultComponentPrices = {
-  cpu: '',
-  gpu: '',
-  ram: '',
-  storage: '',
-  motherboard: '',
-  psu: '',
-  case: '',
-  cooling: '',
+  cpu: 0,
+  gpu: 0,
+  ram: 0,
+  storage: 0,
+  motherboard: 0,
+  psu: 0,
+  case: 0,
+  cooling: 0,
 };
 
 export const saleBadgeOptions = [
@@ -217,7 +217,7 @@ export const defaultVisualSettings = {
 
 export const defaultConfig = {
   modelName: '',
-  price: '',
+  price: 0,
   components: { ...defaultComponents },
   storeName: '',
   storeLogo: null,
@@ -234,12 +234,12 @@ export const defaultConfig = {
   componentPrices: { ...defaultComponentPrices },
   showComponentPrices: false,
   // Inventory
-  stockStatus: '' as const,
+  stockStatus: null,
   stockQuantity: '',
   // Sale info
   saleInfo: {
     enabled: false,
-    originalPrice: '',
+    originalPrice: 0,
     badgeText: 'SALE',
   },
   // Financing
@@ -251,5 +251,5 @@ export const defaultConfig = {
   // Visual settings
   visualSettings: { ...defaultVisualSettings },
   // Condition
-  condition: '' as const,
+  condition: null,
 };

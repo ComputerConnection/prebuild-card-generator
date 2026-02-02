@@ -2,12 +2,51 @@
  * PricingSalesForm - Sale information and financing options
  */
 
+import { useState, useCallback, useEffect } from 'react';
 import { useConfigStore } from '../../stores';
 import { saleBadgeOptions, financingTermOptions } from '../../data/componentOptions';
-import { calculateMonthlyPayment, calculateDiscountPercent } from '../../types';
+import { calculateMonthlyPayment, calculateDiscountPercent, formatPriceForInput, parsePrice } from '../../types';
+import { validateSalePrice, validateApr } from '../../utils/validation';
+
+interface FormErrors {
+  originalPrice?: string;
+  apr?: string;
+}
 
 export function PricingSalesForm() {
   const { config, setConfig } = useConfigStore();
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  // Validate sale price relationship whenever either price changes
+  useEffect(() => {
+    if (config.saleInfo.enabled && config.saleInfo.originalPrice > 0 && config.price > 0) {
+      const validation = validateSalePrice(config.saleInfo.originalPrice, config.price);
+      setErrors(prev => ({ ...prev, originalPrice: validation.error }));
+    } else {
+      setErrors(prev => ({ ...prev, originalPrice: undefined }));
+    }
+  }, [config.saleInfo.enabled, config.saleInfo.originalPrice, config.price]);
+
+  const handleOriginalPriceChange = useCallback((value: string) => {
+    const originalPrice = parsePrice(value);
+    setConfig({
+      saleInfo: { ...config.saleInfo, originalPrice },
+    });
+  }, [config.saleInfo, setConfig]);
+
+  const handleAprChange = useCallback((value: string) => {
+    const apr = parseFloat(value) || 0;
+    setConfig({
+      financingInfo: { ...config.financingInfo, apr },
+    });
+    const validation = validateApr(apr);
+    setErrors(prev => ({ ...prev, apr: validation.error }));
+  }, [config.financingInfo, setConfig]);
+
+  const handleAprBlur = useCallback(() => {
+    const validation = validateApr(config.financingInfo.apr);
+    setErrors(prev => ({ ...prev, apr: validation.error }));
+  }, [config.financingInfo.apr]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -35,22 +74,25 @@ export function PricingSalesForm() {
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Original Price</label>
-              <input
-                type="text"
-                value={config.saleInfo.originalPrice}
-                onChange={(e) =>
-                  setConfig({
-                    saleInfo: { ...config.saleInfo, originalPrice: e.target.value },
-                  })
-                }
-                placeholder="e.g., $1,799"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {config.saleInfo.originalPrice && config.price && (
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <input
+                  type="text"
+                  value={formatPriceForInput(config.saleInfo.originalPrice)}
+                  onChange={(e) => handleOriginalPriceChange(e.target.value)}
+                  placeholder="1,799"
+                  className={`w-full pl-7 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.originalPrice ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              {errors.originalPrice ? (
+                <p className="text-sm text-red-600 mt-1">{errors.originalPrice}</p>
+              ) : config.saleInfo.originalPrice > 0 && config.price > 0 && config.saleInfo.originalPrice > config.price ? (
                 <p className="text-sm text-green-600 mt-1">
                   {calculateDiscountPercent(config.saleInfo.originalPrice, config.price)}% off
                 </p>
-              )}
+              ) : null}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sale Badge Text</label>
@@ -115,20 +157,19 @@ export function PricingSalesForm() {
               <input
                 type="number"
                 min="0"
-                max="30"
+                max="100"
                 step="0.1"
                 value={config.financingInfo.apr}
-                onChange={(e) =>
-                  setConfig({
-                    financingInfo: {
-                      ...config.financingInfo,
-                      apr: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
+                onChange={(e) => handleAprChange(e.target.value)}
+                onBlur={handleAprBlur}
                 placeholder="0 for 0% APR"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.apr ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.apr && (
+                <p className="mt-1 text-xs text-red-600">{errors.apr}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Payment</label>

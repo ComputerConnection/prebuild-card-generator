@@ -103,8 +103,14 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
+            // Core React libraries - loaded immediately
             vendor: ['react', 'react-dom'],
-            pdf: ['jspdf'],
+            // PDF generation - lazy loaded on export
+            'pdf-generator': ['jspdf'],
+            // QR/Barcode libraries - needed for preview
+            codes: ['qrcode', 'jsbarcode'],
+            // State management
+            zustand: ['zustand'],
           },
         },
       },

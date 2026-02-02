@@ -1,10 +1,14 @@
 import QRCode from 'qrcode';
+import { logger } from './logger';
 
 /**
  * Generate QR code as data URL
  */
 export async function generateQRCodeDataUrl(text: string, size: number = 128): Promise<string> {
-  if (!text) return '';
+  if (!text) {
+    logger.debug('QRCode', 'Skipping QR code generation - no text provided');
+    return '';
+  }
 
   try {
     const dataUrl = await QRCode.toDataURL(text, {
@@ -15,9 +19,10 @@ export async function generateQRCodeDataUrl(text: string, size: number = 128): P
         light: '#ffffff',
       },
     });
+    logger.debug('QRCode', 'Successfully generated QR code', { textLength: text.length, size });
     return dataUrl;
   } catch (err) {
-    console.error('Failed to generate QR code:', err);
+    logger.error('QRCode', 'Failed to generate QR code', err);
     return '';
   }
 }
@@ -26,7 +31,10 @@ export async function generateQRCodeDataUrl(text: string, size: number = 128): P
  * Generate QR code as canvas for PDF embedding
  */
 export async function generateQRCodeCanvas(text: string, size: number = 128): Promise<HTMLCanvasElement | null> {
-  if (!text) return null;
+  if (!text) {
+    logger.debug('QRCode', 'Skipping QR code canvas generation - no text provided');
+    return null;
+  }
 
   try {
     const canvas = document.createElement('canvas');
@@ -38,9 +46,10 @@ export async function generateQRCodeCanvas(text: string, size: number = 128): Pr
         light: '#ffffff',
       },
     });
+    logger.debug('QRCode', 'Successfully generated QR code canvas', { textLength: text.length, size });
     return canvas;
   } catch (err) {
-    console.error('Failed to generate QR code canvas:', err);
+    logger.error('QRCode', 'Failed to generate QR code canvas', err);
     return null;
   }
 }

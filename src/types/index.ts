@@ -10,23 +10,22 @@ export interface ComponentSpec {
 }
 
 export interface ComponentPrices {
-  cpu: string;
-  gpu: string;
-  ram: string;
-  storage: string;
-  motherboard: string;
-  psu: string;
-  case: string;
-  cooling: string;
+  cpu: number;
+  gpu: number;
+  ram: number;
+  storage: number;
+  motherboard: number;
+  psu: number;
+  case: number;
+  cooling: number;
 }
 
-export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'on_order' | '';
+export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'on_order';
 
 // Condition type for preowned/new status
-export type ConditionType = 'new' | 'preowned' | 'refurbished' | 'open_box' | 'certified_preowned' | '';
+export type ConditionType = 'new' | 'preowned' | 'refurbished' | 'open_box' | 'certified_preowned';
 
 export const CONDITION_CONFIG: Record<ConditionType, { label: string; shortLabel: string; color: string; bgColor: string; description: string }> = {
-  '': { label: '', shortLabel: '', color: '', bgColor: '', description: '' },
   'new': { label: 'Brand New', shortLabel: 'NEW', color: '#16a34a', bgColor: '#dcfce7', description: 'Factory sealed, never opened' },
   'preowned': { label: 'Pre-Owned', shortLabel: 'PREOWNED', color: '#7c3aed', bgColor: '#ede9fe', description: 'Previously used, tested working' },
   'refurbished': { label: 'Refurbished', shortLabel: 'REFURB', color: '#2563eb', bgColor: '#dbeafe', description: 'Restored to working condition' },
@@ -36,7 +35,7 @@ export const CONDITION_CONFIG: Record<ConditionType, { label: string; shortLabel
 
 export interface SaleInfo {
   enabled: boolean;
-  originalPrice: string;
+  originalPrice: number;
   badgeText: string; // e.g., "SALE", "HOT DEAL", custom text
 }
 
@@ -129,7 +128,7 @@ export interface BrandIcon {
 
 export interface PrebuildConfig {
   modelName: string;
-  price: string;
+  price: number;
   components: ComponentSpec;
   storeName: string;
   storeLogo: string | null;
@@ -148,7 +147,7 @@ export interface PrebuildConfig {
   componentPrices: ComponentPrices;
   showComponentPrices: boolean;
   // Inventory
-  stockStatus: StockStatus;
+  stockStatus: StockStatus | null;
   stockQuantity: string;
   // Sale/Discount
   saleInfo: SaleInfo;
@@ -157,7 +156,7 @@ export interface PrebuildConfig {
   // Visual settings
   visualSettings: VisualSettings;
   // Condition (new/preowned)
-  condition: ConditionType;
+  condition: ConditionType | null;
 }
 
 // Brand icons are stored separately from presets (shared across all)
@@ -240,41 +239,107 @@ export function getThemeColors(config: PrebuildConfig): ThemeColors {
   return THEME_PRESETS[config.colorTheme];
 }
 
-// Calculate monthly payment for financing
-export function calculateMonthlyPayment(price: string, months: number, apr: number): string {
-  const principal = parseFloat(price.replace(/[^0-9.]/g, ''));
-  if (isNaN(principal) || principal <= 0 || months <= 0) return '';
+// ============================================================================
+// PRICE FORMATTING UTILITIES
+// ============================================================================
+
+/**
+ * Format a number as a price string with $ symbol and commas
+ * @param price - The price as a number
+ * @param showCents - Whether to show cents (default: true)
+ * @returns Formatted price string (e.g., "$1,499.00" or "$1,499")
+ */
+export function formatPrice(price: number, showCents: boolean = true): string {
+  if (price === 0) return showCents ? '$0.00' : '$0';
+  if (isNaN(price)) return showCents ? '$0.00' : '$0';
+
+  const formatted = price.toLocaleString('en-US', {
+    minimumFractionDigits: showCents ? 2 : 0,
+    maximumFractionDigits: showCents ? 2 : 0,
+  });
+  return `$${formatted}`;
+}
+
+/**
+ * Parse a price string into a number
+ * Handles formats like "$1,499", "1499.99", "$1,499.00", etc.
+ * @param priceString - The price string to parse
+ * @returns The price as a number, or 0 if invalid
+ */
+export function parsePrice(priceString: string): number {
+  if (!priceString) return 0;
+  // Remove $ and commas, then parse
+  const cleaned = priceString.replace(/[$,]/g, '').trim();
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+/**
+ * Format a price for display in an input field (no $ symbol for easier editing)
+ * @param price - The price as a number
+ * @returns Formatted string without $ symbol
+ */
+export function formatPriceForInput(price: number): string {
+  if (price === 0) return '';
+  if (isNaN(price)) return '';
+  return price.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+}
+
+// ============================================================================
+// CALCULATION UTILITIES
+// ============================================================================
+
+/**
+ * Calculate monthly payment for financing
+ * @param price - The total price as a number
+ * @param months - Number of months for financing
+ * @param apr - Annual percentage rate
+ * @returns Monthly payment formatted as string, or empty string if invalid
+ */
+export function calculateMonthlyPayment(price: number, months: number, apr: number): string {
+  if (price <= 0 || months <= 0) return '';
 
   if (apr === 0) {
-    return (principal / months).toFixed(2);
+    return (price / months).toFixed(2);
   }
 
   const monthlyRate = apr / 100 / 12;
-  const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+  const payment = price * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
   return payment.toFixed(2);
 }
 
-// Calculate discount percentage
-export function calculateDiscountPercent(originalPrice: string, salePrice: string): number {
-  const original = parseFloat(originalPrice.replace(/[^0-9.]/g, ''));
-  const sale = parseFloat(salePrice.replace(/[^0-9.]/g, ''));
-  if (isNaN(original) || isNaN(sale) || original <= 0) return 0;
-  return Math.round(((original - sale) / original) * 100);
+/**
+ * Calculate discount percentage between original and sale price
+ * @param originalPrice - Original price as a number
+ * @param salePrice - Sale price as a number
+ * @returns Discount percentage as a whole number
+ */
+export function calculateDiscountPercent(originalPrice: number, salePrice: number): number {
+  if (originalPrice <= 0 || salePrice < 0) return 0;
+  if (salePrice >= originalPrice) return 0;
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
 }
 
-// Calculate total component prices
+/**
+ * Calculate total of all component prices
+ * @param prices - ComponentPrices object with numeric values
+ * @returns Total price as a number
+ */
 export function calculateComponentTotal(prices: ComponentPrices): number {
   let total = 0;
   Object.values(prices).forEach(price => {
-    const num = parseFloat(price.replace(/[^0-9.]/g, ''));
-    if (!isNaN(num)) total += num;
+    if (typeof price === 'number' && !isNaN(price)) {
+      total += price;
+    }
   });
   return total;
 }
 
 // Stock status labels and colors
 export const STOCK_STATUS_CONFIG: Record<StockStatus, { label: string; color: string; bgColor: string }> = {
-  '': { label: '', color: '', bgColor: '' },
   'in_stock': { label: 'In Stock', color: '#16a34a', bgColor: '#dcfce7' },
   'low_stock': { label: 'Low Stock', color: '#ca8a04', bgColor: '#fef9c3' },
   'out_of_stock': { label: 'Out of Stock', color: '#dc2626', bgColor: '#fee2e2' },

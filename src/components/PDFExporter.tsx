@@ -1,8 +1,12 @@
-import { useState } from 'react';
-import { jsPDF } from 'jspdf';
+/**
+ * PDFExporter - Export PDF cards with lazy loading
+ * PDF libraries are loaded on-demand to reduce initial bundle size
+ */
+
+import { useState, useCallback, useId, memo } from 'react';
 import { PrebuildConfig, CardSize, CARD_SIZES, BrandIcon } from '../types';
-import { generatePDF, generateShelfTagMultiUp, generatePriceCardMultiUp, downloadPDF } from '../utils/pdfGenerator';
 import { EmailDialog } from './EmailDialog';
+import type { jsPDF } from 'jspdf';
 
 interface PDFExporterProps {
   config: PrebuildConfig;
@@ -13,7 +17,18 @@ interface PDFExporterProps {
 
 const ALL_SIZES: CardSize[] = ['shelf', 'price', 'poster'];
 
-export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: PDFExporterProps) {
+// Module cache for lazy-loaded PDF functions
+let pdfModule: typeof import('../utils/pdfGenerator') | null = null;
+
+// Preload PDF module (called on hover)
+const preloadPDFModule = async () => {
+  if (!pdfModule) {
+    pdfModule = await import('../utils/pdfGenerator');
+  }
+  return pdfModule;
+};
+
+export const PDFExporter = memo(function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: PDFExporterProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const [isGeneratingShelfMultiUp, setIsGeneratingShelfMultiUp] = useState(false);
@@ -22,10 +37,25 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [currentPdf, setCurrentPdf] = useState<jsPDF | null>(null);
   const [isPreparingEmail, setIsPreparingEmail] = useState(false);
+  const [isLoadingModule, setIsLoadingModule] = useState(false);
+  const baseId = useId();
 
-  const handleExport = async () => {
+  // Lazy load the PDF generator module
+  const loadPDFModule = useCallback(async () => {
+    if (pdfModule) return pdfModule;
+    setIsLoadingModule(true);
+    try {
+      pdfModule = await import('../utils/pdfGenerator');
+      return pdfModule;
+    } finally {
+      setIsLoadingModule(false);
+    }
+  }, []);
+
+  const handleExport = useCallback(async () => {
     setIsGenerating(true);
     try {
+      const { generatePDF, downloadPDF } = await loadPDFModule();
       const doc = await generatePDF(config, cardSize, brandIcons);
       const filename = `${config.modelName || 'PC-Build'}-${CARD_SIZES[cardSize].name.replace(/\s+/g, '-')}.pdf`;
       downloadPDF(doc, filename);
@@ -35,13 +65,15 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [config, cardSize, brandIcons, loadPDFModule]);
 
-  const handleExportAll = async () => {
+  const handleExportAll = useCallback(async () => {
     setIsGeneratingAll(true);
     setBatchProgress(0);
 
     try {
+      const { generatePDF, downloadPDF } = await loadPDFModule();
+
       for (let i = 0; i < ALL_SIZES.length; i++) {
         const size = ALL_SIZES[i];
         setBatchProgress(i + 1);
@@ -62,11 +94,12 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
       setIsGeneratingAll(false);
       setBatchProgress(0);
     }
-  };
+  }, [config, brandIcons, loadPDFModule]);
 
-  const handleExportShelfMultiUp = async () => {
+  const handleExportShelfMultiUp = useCallback(async () => {
     setIsGeneratingShelfMultiUp(true);
     try {
+      const { generateShelfTagMultiUp, downloadPDF } = await loadPDFModule();
       const doc = await generateShelfTagMultiUp(config, true, brandIcons);
       const filename = `${config.modelName || 'PC-Build'}-Shelf-Tags-12up.pdf`;
       downloadPDF(doc, filename);
@@ -76,11 +109,12 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
     } finally {
       setIsGeneratingShelfMultiUp(false);
     }
-  };
+  }, [config, brandIcons, loadPDFModule]);
 
-  const handleExportPriceMultiUp = async () => {
+  const handleExportPriceMultiUp = useCallback(async () => {
     setIsGeneratingPriceMultiUp(true);
     try {
+      const { generatePriceCardMultiUp, downloadPDF } = await loadPDFModule();
       const doc = await generatePriceCardMultiUp(config, true, brandIcons);
       const filename = `${config.modelName || 'PC-Build'}-Price-Cards-2up.pdf`;
       downloadPDF(doc, filename);
@@ -90,13 +124,14 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
     } finally {
       setIsGeneratingPriceMultiUp(false);
     }
-  };
+  }, [config, brandIcons, loadPDFModule]);
 
-  const isDisabled = isGenerating || isGeneratingAll || isGeneratingShelfMultiUp || isGeneratingPriceMultiUp || isPreparingEmail;
+  const isDisabled = isGenerating || isGeneratingAll || isGeneratingShelfMultiUp || isGeneratingPriceMultiUp || isPreparingEmail || isLoadingModule;
 
-  const handlePrepareEmail = async () => {
+  const handlePrepareEmail = useCallback(async () => {
     setIsPreparingEmail(true);
     try {
+      const { generatePDF } = await loadPDFModule();
       const doc = await generatePDF(config, cardSize, brandIcons);
       setCurrentPdf(doc);
       setEmailDialogOpen(true);
@@ -106,18 +141,28 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
     } finally {
       setIsPreparingEmail(false);
     }
-  };
+  }, [config, cardSize, brandIcons, loadPDFModule]);
+
+  // Handle preload on mouse enter - memoized to prevent recreation
+  const handleMouseEnter = useCallback(() => {
+    preloadPDFModule();
+  }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Export PDF</h2>
+    <div
+      className="bg-white rounded-lg shadow-md p-4"
+      onMouseEnter={handleMouseEnter}
+    >
+      <h2 id={`${baseId}-heading`} className="text-lg font-semibold text-gray-800 mb-3">
+        Export PDF
+      </h2>
 
       {/* Size Selection */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label id={`${baseId}-size-label`} className="block text-sm font-medium text-gray-700 mb-2">
           Card Size
         </label>
-        <div className="space-y-2">
+        <div className="space-y-2" role="radiogroup" aria-labelledby={`${baseId}-size-label`}>
           {(Object.keys(CARD_SIZES) as CardSize[]).map((size) => {
             const sizeConfig = CARD_SIZES[size];
             return (
@@ -148,6 +193,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                     className="w-5 h-5 text-blue-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
+                    aria-hidden="true"
                   >
                     <path
                       fillRule="evenodd"
@@ -168,15 +214,17 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
         <button
           onClick={handleExport}
           disabled={isDisabled}
-          className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-describedby={isLoadingModule ? `${baseId}-loading` : undefined}
         >
-          {isGenerating ? (
+          {isGenerating || isLoadingModule ? (
             <>
               <svg
                 className="animate-spin h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -192,7 +240,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              Generating...
+              {isLoadingModule ? 'Loading...' : 'Generating...'}
             </>
           ) : (
             <>
@@ -201,6 +249,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -213,6 +262,11 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
             </>
           )}
         </button>
+        {isLoadingModule && (
+          <p id={`${baseId}-loading`} className="sr-only">
+            Loading PDF generator module
+          </p>
+        )}
 
         {/* Multi-up Buttons */}
         <div className="grid grid-cols-2 gap-2">
@@ -220,7 +274,8 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
           <button
             onClick={handleExportShelfMultiUp}
             disabled={isDisabled}
-            className="px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+            className="px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            aria-label="Download 12-up shelf tags on letter paper"
           >
             {isGeneratingShelfMultiUp ? (
               <svg
@@ -228,6 +283,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -250,6 +306,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -267,7 +324,8 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
           <button
             onClick={handleExportPriceMultiUp}
             disabled={isDisabled}
-            className="px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+            className="px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            aria-label="Download 2-up price cards on letter paper"
           >
             {isGeneratingPriceMultiUp ? (
               <svg
@@ -275,6 +333,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -297,6 +356,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -318,7 +378,8 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
         <button
           onClick={handleExportAll}
           disabled={isDisabled}
-          className="w-full px-4 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          aria-label="Download all three card sizes"
         >
           {isGeneratingAll ? (
             <>
@@ -327,6 +388,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -351,6 +413,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -371,7 +434,8 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
         <button
           onClick={handlePrepareEmail}
           disabled={isDisabled}
-          className="w-full px-4 py-3 bg-orange-500 text-white font-medium rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 bg-orange-500 text-white font-medium rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+          aria-label={`Email ${CARD_SIZES[cardSize].name} PDF`}
         >
           {isPreparingEmail ? (
             <>
@@ -380,6 +444,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -404,6 +469,7 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -431,4 +497,4 @@ export function PDFExporter({ config, cardSize, onCardSizeChange, brandIcons }: 
       />
     </div>
   );
-}
+});

@@ -2,11 +2,25 @@
  * InventoryStatusForm - Condition, stock status, and quantity
  */
 
+import { useState, useCallback } from 'react';
 import { useConfigStore } from '../../stores';
 import { ConditionType, StockStatus, CONDITION_CONFIG, STOCK_STATUS_CONFIG } from '../../types';
+import { validateStockQuantity } from '../../utils/validation';
 
 export function InventoryStatusForm() {
   const { config, setConfig } = useConfigStore();
+  const [errors, setErrors] = useState<{ stockQuantity?: string }>({});
+
+  const handleQuantityChange = useCallback((value: string) => {
+    setConfig({ stockQuantity: value });
+    const validation = validateStockQuantity(value);
+    setErrors({ stockQuantity: validation.error });
+  }, [setConfig]);
+
+  const handleQuantityBlur = useCallback(() => {
+    const validation = validateStockQuantity(config.stockQuantity);
+    setErrors({ stockQuantity: validation.error });
+  }, [config.stockQuantity]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -15,8 +29,8 @@ export function InventoryStatusForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
           <select
-            value={config.condition}
-            onChange={(e) => setConfig({ condition: e.target.value as ConditionType })}
+            value={config.condition ?? ''}
+            onChange={(e) => setConfig({ condition: e.target.value ? e.target.value as ConditionType : null })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">Not specified</option>
@@ -30,8 +44,8 @@ export function InventoryStatusForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
           <select
-            value={config.stockStatus}
-            onChange={(e) => setConfig({ stockStatus: e.target.value as StockStatus })}
+            value={config.stockStatus ?? ''}
+            onChange={(e) => setConfig({ stockStatus: e.target.value ? e.target.value as StockStatus : null })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">No status</option>
@@ -46,17 +60,23 @@ export function InventoryStatusForm() {
           <input
             type="text"
             value={config.stockQuantity}
-            onChange={(e) => setConfig({ stockQuantity: e.target.value })}
+            onChange={(e) => handleQuantityChange(e.target.value)}
+            onBlur={handleQuantityBlur}
             placeholder="e.g., 5 units"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.stockQuantity ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
+          {errors.stockQuantity && (
+            <p className="mt-1 text-xs text-red-600">{errors.stockQuantity}</p>
+          )}
         </div>
       </div>
 
       {/* Status badges preview */}
-      {(config.condition || config.stockStatus) && (
+      {(config.condition !== null || config.stockStatus !== null) && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {config.condition && (
+          {config.condition !== null && (
             <span
               className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
               style={{
@@ -67,7 +87,7 @@ export function InventoryStatusForm() {
               {CONDITION_CONFIG[config.condition].label}
             </span>
           )}
-          {config.stockStatus && (
+          {config.stockStatus !== null && (
             <span
               className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
               style={{
@@ -81,7 +101,7 @@ export function InventoryStatusForm() {
           )}
         </div>
       )}
-      {config.condition && (
+      {config.condition !== null && (
         <p className="mt-2 text-xs text-gray-500">
           {CONDITION_CONFIG[config.condition].description}
         </p>

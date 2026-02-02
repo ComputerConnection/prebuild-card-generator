@@ -1,9 +1,11 @@
 /**
  * App - Main application component
- * Simplified to ~50 lines by extracting forms and layout
+ * Simplified by extracting forms and layout
+ * Optimized with shallow selectors to prevent unnecessary re-renders
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { MainLayout } from './components/layout';
 import {
   StoreBrandingForm,
@@ -15,41 +17,35 @@ import {
   AdditionalDetailsForm,
 } from './components/forms';
 import { PresetManager } from './components/PresetManager';
+import { PrintQueue } from './components/PrintQueue';
 import { CardPreview } from './components/CardPreview';
 import { PDFExporter } from './components/PDFExporter';
 import { BrandIconManager } from './components/BrandIconManager';
 import { VisualSettingsComponent } from './components/VisualSettings';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { useConfigStore, useUIStore, useBrandIconsStore } from './stores';
+import { useConfigStore, useUIStore, useBrandIconsStore, usePrintQueueStore } from './stores';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import type { BrandIcon } from './types';
+import { VisualSettings } from './types';
 
 function App() {
-  const { config, loadConfig, resetConfig, undo, redo } = useConfigStore();
-  const { cardSize, setCardSize } = useUIStore();
-  const { icons } = useBrandIconsStore();
-
-  // Legacy brand icons support
-  const [legacyBrandIcons, setLegacyBrandIcons] = useState<BrandIcon[]>([]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('prebuild-card-brand-icons');
-    if (stored) {
-      try {
-        setLegacyBrandIcons(JSON.parse(stored));
-      } catch {
-        // Ignore parse errors
-      }
-    }
-  }, []);
-
-  // Merge store icons with legacy
-  const allBrandIcons = [...legacyBrandIcons, ...icons];
-
-  const handleBrandIconsUpdate = useCallback((newIcons: BrandIcon[]) => {
-    setLegacyBrandIcons(newIcons);
-    localStorage.setItem('prebuild-card-brand-icons', JSON.stringify(newIcons));
-  }, []);
+  // Use shallow selectors to prevent unnecessary re-renders
+  const { config, loadConfig, resetConfig, undo, redo } = useConfigStore(
+    useShallow((state) => ({
+      config: state.config,
+      loadConfig: state.loadConfig,
+      resetConfig: state.resetConfig,
+      undo: state.undo,
+      redo: state.redo,
+    }))
+  );
+  const { cardSize, setCardSize } = useUIStore(
+    useShallow((state) => ({
+      cardSize: state.cardSize,
+      setCardSize: state.setCardSize,
+    }))
+  );
+  const brandIcons = useBrandIconsStore((state) => state.icons);
+  const addMultipleToQueue = usePrintQueueStore((state) => state.addMultipleToQueue);
 
   // Keyboard shortcuts
   const handleKeyboardSave = useCallback(() => {
@@ -62,6 +58,11 @@ function App() {
       resetConfig();
     }
   }, [resetConfig]);
+
+  // Memoize visual settings change handler
+  const handleVisualSettingsChange = useCallback((settings: VisualSettings) => {
+    useConfigStore.getState().setVisualSettings(settings);
+  }, []);
 
   useKeyboardShortcuts({
     onSave: handleKeyboardSave,
@@ -104,32 +105,31 @@ function App() {
             <PresetManager
               currentConfig={config}
               onLoadPreset={loadConfig}
-              onPrintQueue={(presets) => {
-                alert(
-                  `Print queue with ${presets.length} presets. This would batch generate PDFs for: ${presets.map((p) => p.name).join(', ')}`
-                );
-              }}
+              onPrintQueue={addMultipleToQueue}
             />
+          </ErrorBoundary>
+          <ErrorBoundary compact>
+            <PrintQueue />
           </ErrorBoundary>
           <ErrorBoundary compact>
             <VisualSettingsComponent
               settings={config.visualSettings}
               sku={config.sku}
-              onChange={(settings) => useConfigStore.getState().setVisualSettings(settings)}
+              onChange={handleVisualSettingsChange}
             />
           </ErrorBoundary>
           <ErrorBoundary compact>
-            <BrandIconManager brandIcons={allBrandIcons} onUpdate={handleBrandIconsUpdate} />
+            <BrandIconManager />
           </ErrorBoundary>
           <ErrorBoundary compact>
-            <CardPreview config={config} cardSize={cardSize} brandIcons={allBrandIcons} />
+            <CardPreview config={config} cardSize={cardSize} brandIcons={brandIcons} />
           </ErrorBoundary>
           <ErrorBoundary compact>
             <PDFExporter
               config={config}
               cardSize={cardSize}
               onCardSizeChange={setCardSize}
-              brandIcons={allBrandIcons}
+              brandIcons={brandIcons}
             />
           </ErrorBoundary>
         </div>

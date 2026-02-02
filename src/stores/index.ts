@@ -8,3 +8,5 @@ export { usePresetsStore } from './presetsStore';
 export { useLibraryStore } from './libraryStore';
 export type { LibraryComponent, ComponentLibrary } from './libraryStore';
 export { useBrandIconsStore } from './brandIconsStore';
+export { usePrintQueueStore } from './printQueueStore';
+export type { PrintQueueProgress } from './printQueueStore';

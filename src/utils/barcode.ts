@@ -1,4 +1,5 @@
 import JsBarcode from 'jsbarcode';
+import { logger } from './logger';
 
 /**
  * Generate barcode as data URL
@@ -9,7 +10,10 @@ export function generateBarcodeDataUrl(text: string, options?: {
   height?: number;
   displayValue?: boolean;
 }): string {
-  if (!text) return '';
+  if (!text) {
+    logger.debug('Barcode', 'Skipping barcode generation - no text provided');
+    return '';
+  }
 
   try {
     const canvas = document.createElement('canvas');
@@ -21,9 +25,10 @@ export function generateBarcodeDataUrl(text: string, options?: {
       fontSize: 12,
       margin: 5,
     });
+    logger.debug('Barcode', 'Successfully generated barcode', { text, format: options?.format || 'CODE128' });
     return canvas.toDataURL('image/png');
   } catch (err) {
-    console.error('Failed to generate barcode:', err);
+    logger.error('Barcode', 'Failed to generate barcode', err);
     return '';
   }
 }
@@ -33,5 +38,9 @@ export function generateBarcodeDataUrl(text: string, options?: {
  */
 export function isValidBarcode(text: string): boolean {
   // CODE128 accepts most ASCII characters
-  return text.length > 0 && text.length <= 80 && /^[\x00-\x7F]+$/.test(text);
+  const isValid = text.length > 0 && text.length <= 80 && /^[\x00-\x7F]+$/.test(text);
+  if (!isValid && text.length > 0) {
+    logger.debug('Barcode', 'Invalid barcode text', { text, length: text.length });
+  }
+  return isValid;
 }

@@ -1,8 +1,10 @@
 /**
  * ComponentsForm - PC component selection with library management
+ * Optimized with shallow selectors and memo
  */
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, memo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useConfigStore } from '../../stores';
 import { EnhancedComponentSelector } from '../EnhancedComponentSelector';
 import { ComponentCategory, calculateComponentTotal } from '../../types';
@@ -28,8 +30,16 @@ const COMPONENT_ORDER: ComponentCategory[] = [
   'cooling',
 ];
 
-export function ComponentsForm() {
-  const { config, setConfig, setComponent, setComponentPrice } = useConfigStore();
+export const ComponentsForm = memo(function ComponentsForm() {
+  // Use shallow selector to prevent unnecessary re-renders
+  const { config, setConfig, setComponent, setComponentPrice } = useConfigStore(
+    useShallow((state) => ({
+      config: state.config,
+      setConfig: state.setConfig,
+      setComponent: state.setComponent,
+      setComponentPrice: state.setComponentPrice,
+    }))
+  );
   const libraryImportRef = useRef<HTMLInputElement>(null);
 
   // Use the legacy component library system for compatibility
@@ -148,4 +158,4 @@ export function ComponentsForm() {
       </div>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import {
   VisualSettings as VisualSettingsType,
   BACKGROUND_PATTERNS,
@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { generateQRCodeDataUrl } from '../utils/qrcode';
 import { generateBarcodeDataUrl, isValidBarcode } from '../utils/barcode';
+import { validateUrl, validateImageFile } from '../utils/validation';
 
 interface VisualSettingsProps {
   settings: VisualSettingsType;
@@ -17,10 +18,16 @@ interface VisualSettingsProps {
   onChange: (settings: VisualSettingsType) => void;
 }
 
+interface FormErrors {
+  qrCodeUrl?: string;
+  productImage?: string;
+}
+
 export function VisualSettingsComponent({ settings, sku, onChange }: VisualSettingsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [qrPreview, setQrPreview] = useState<string>('');
   const [barcodePreview, setBarcodePreview] = useState<string>('');
+  const [errors, setErrors] = useState<FormErrors>({});
   const productImageRef = useRef<HTMLInputElement>(null);
 
   // Generate QR preview when URL changes
@@ -41,9 +48,34 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
     }
   }, [sku]);
 
+  const handleQrUrlChange = useCallback((url: string) => {
+    onChange({ ...settings, qrCodeUrl: url });
+    if (url) {
+      const validation = validateUrl(url);
+      setErrors(prev => ({ ...prev, qrCodeUrl: validation.error }));
+    } else {
+      setErrors(prev => ({ ...prev, qrCodeUrl: undefined }));
+    }
+  }, [settings, onChange]);
+
+  const handleQrUrlBlur = useCallback(() => {
+    if (settings.qrCodeUrl) {
+      const validation = validateUrl(settings.qrCodeUrl);
+      setErrors(prev => ({ ...prev, qrCodeUrl: validation.error }));
+    }
+  }, [settings.qrCodeUrl]);
+
   const handleProductImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file before reading
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setErrors(prev => ({ ...prev, productImage: validation.error }));
+      return;
+    }
+    setErrors(prev => ({ ...prev, productImage: undefined }));
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -151,7 +183,7 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
             <input
               ref={productImageRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
               onChange={handleProductImageUpload}
               className="hidden"
             />
@@ -172,12 +204,18 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
             ) : (
               <button
                 onClick={() => productImageRef.current?.click()}
-                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md border border-gray-300"
+                className={`px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md border ${
+                  errors.productImage ? 'border-red-500' : 'border-gray-300'
+                }`}
               >
                 Upload Product Image
               </button>
             )}
-            <p className="text-xs text-gray-500 mt-1">Shown on Price Cards and Posters</p>
+            {errors.productImage ? (
+              <p className="text-xs text-red-600 mt-1">{errors.productImage}</p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">Shown on Price Cards and Posters (max 5MB)</p>
+            )}
           </div>
 
           {/* QR Code */}
@@ -192,16 +230,24 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
               <span className="text-sm font-medium text-gray-700">Show QR Code</span>
             </label>
             {settings.showQrCode && (
-              <div className="flex gap-3">
-                <input
-                  type="url"
-                  value={settings.qrCodeUrl}
-                  onChange={(e) => onChange({ ...settings, qrCodeUrl: e.target.value })}
-                  placeholder="https://example.com/product"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {qrPreview && (
-                  <img src={qrPreview} alt="QR Preview" className="w-12 h-12" />
+              <div>
+                <div className="flex gap-3">
+                  <input
+                    type="url"
+                    value={settings.qrCodeUrl}
+                    onChange={(e) => handleQrUrlChange(e.target.value)}
+                    onBlur={handleQrUrlBlur}
+                    placeholder="https://example.com/product"
+                    className={`flex-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.qrCodeUrl ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {qrPreview && !errors.qrCodeUrl && (
+                    <img src={qrPreview} alt="QR Preview" className="w-12 h-12" />
+                  )}
+                </div>
+                {errors.qrCodeUrl && (
+                  <p className="mt-1 text-xs text-red-600">{errors.qrCodeUrl}</p>
                 )}
               </div>
             )}

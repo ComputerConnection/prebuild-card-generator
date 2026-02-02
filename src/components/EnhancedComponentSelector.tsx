@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { ComponentCategory, COMPONENT_LABELS } from '../types';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
+import { ComponentCategory, COMPONENT_LABELS, formatPriceForInput, parsePrice } from '../types';
 import {
   ComponentLibrary,
   ComponentEntry,
@@ -15,8 +15,8 @@ interface EnhancedComponentSelectorProps {
   library: ComponentLibrary;
   onChange: (value: string) => void;
   onAddNew: (category: ComponentCategory, brand: string, modelLine: string, model: string) => void;
-  priceValue?: string;
-  onPriceChange?: (value: string) => void;
+  priceValue?: number;
+  onPriceChange?: (value: number) => void;
   showPrice?: boolean;
 }
 
@@ -24,7 +24,7 @@ const FAVORITES_KEY = 'component-favorites';
 const RECENT_KEY = 'component-recent';
 const MAX_RECENT = 5;
 
-export function EnhancedComponentSelector({
+export const EnhancedComponentSelector = memo(function EnhancedComponentSelector({
   category,
   value,
   library,
@@ -406,14 +406,17 @@ export function EnhancedComponentSelector({
 
       {/* Price input */}
       {showPrice && onPriceChange && (
-        <input
-          type="text"
-          value={priceValue || ''}
-          onChange={(e) => onPriceChange(e.target.value)}
-          placeholder={`${COMPONENT_LABELS[category]} price`}
-          className="w-full mt-1 px-2 py-1 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
+        <div className="relative mt-1">
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+          <input
+            type="text"
+            value={formatPriceForInput(priceValue ?? 0)}
+            onChange={(e) => onPriceChange(parsePrice(e.target.value))}
+            placeholder={`${COMPONENT_LABELS[category]} price`}
+            className="w-full pl-5 pr-2 py-1 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
       )}
     </div>
   );
-}
+});

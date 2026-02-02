@@ -21,7 +21,7 @@ describe('configStore', () => {
     it('should have default config values', () => {
       const { config } = useConfigStore.getState();
       expect(config.modelName).toBe('');
-      expect(config.price).toBe('');
+      expect(config.price).toBe(0);
       expect(config.colorTheme).toBe('minimal');
     });
 
@@ -37,11 +37,11 @@ describe('configStore', () => {
   describe('setConfig', () => {
     it('should update config values', () => {
       const { setConfig } = useConfigStore.getState();
-      setConfig({ modelName: 'Gaming Beast', price: '$1,499' });
+      setConfig({ modelName: 'Gaming Beast', price: 1499 });
 
       const { config } = useConfigStore.getState();
       expect(config.modelName).toBe('Gaming Beast');
-      expect(config.price).toBe('$1,499');
+      expect(config.price).toBe(1499);
     });
 
     it('should add to history when changing', () => {
@@ -78,8 +78,8 @@ describe('configStore', () => {
     });
 
     it('should update price', () => {
-      useConfigStore.getState().setPrice('$2,000');
-      expect(useConfigStore.getState().config.price).toBe('$2,000');
+      useConfigStore.getState().setPrice(2000);
+      expect(useConfigStore.getState().config.price).toBe(2000);
     });
 
     it('should update component', () => {
@@ -137,12 +137,12 @@ describe('configStore', () => {
   describe('resetConfig', () => {
     it('should reset to default values', () => {
       const store = useConfigStore.getState();
-      store.setConfig({ modelName: 'Test', price: '$999' });
+      store.setConfig({ modelName: 'Test', price: 999 });
       store.resetConfig();
 
       const { config } = useConfigStore.getState();
       expect(config.modelName).toBe('');
-      expect(config.price).toBe('');
+      expect(config.price).toBe(0);
     });
 
     it('should add to history when resetting', () => {
@@ -161,7 +161,7 @@ describe('configStore', () => {
       const presetConfig = {
         ...defaultConfig,
         modelName: 'Preset Build',
-        price: '$1,999',
+        price: 1999,
         colorTheme: 'gaming' as const,
       };
 
@@ -169,7 +169,7 @@ describe('configStore', () => {
 
       const { config } = useConfigStore.getState();
       expect(config.modelName).toBe('Preset Build');
-      expect(config.price).toBe('$1,999');
+      expect(config.price).toBe(1999);
       expect(config.colorTheme).toBe('gaming');
     });
   });

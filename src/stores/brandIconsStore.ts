@@ -1,10 +1,22 @@
 /**
  * Brand Icons Store - Manages custom brand icons and store profiles
+ *
+ * Handles migration from legacy localStorage keys:
+ * - 'prebuild-card-brand-icons' (from App.tsx legacy system)
+ * - 'customBrandIcons', 'storeProfiles', 'activeStoreId' (older format)
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BrandIcon, StoreProfile, ColorTheme } from '../types';
+
+// Legacy localStorage keys to migrate from
+const LEGACY_KEYS = {
+  brandIcons: 'prebuild-card-brand-icons',
+  customBrandIcons: 'customBrandIcons',
+  storeProfiles: 'storeProfiles',
+  activeStoreId: 'activeStoreId',
+} as const;
 
 interface BrandIconsState {
   // Brand icons (shared across all configs)
@@ -121,33 +133,78 @@ export const useBrandIconsStore = create<BrandIconsState>()(
     {
       name: 'prebuild-brand-icons-store',
       migrate: (persistedState, version) => {
-        if (version === 0) {
-          // Check for legacy data
+        const state = persistedState as BrandIconsState;
+
+        // Version 0 -> 1: Migrate from old localStorage keys
+        if (version === 0 || version === 1) {
           try {
-            const legacyIcons = localStorage.getItem('customBrandIcons');
-            const legacyProfiles = localStorage.getItem('storeProfiles');
-            const legacyActiveId = localStorage.getItem('activeStoreId');
-
-            const state = persistedState as BrandIconsState;
-
-            if (legacyIcons && state.icons.length === 0) {
-              state.icons = JSON.parse(legacyIcons);
+            // Migrate from 'prebuild-card-brand-icons' (App.tsx legacy)
+            const appLegacyIcons = localStorage.getItem(LEGACY_KEYS.brandIcons);
+            if (appLegacyIcons) {
+              const parsed = JSON.parse(appLegacyIcons) as BrandIcon[];
+              if (Array.isArray(parsed)) {
+                // Merge with existing icons, avoiding duplicates
+                const existingNames = new Set(state.icons.map(i => i.name.toLowerCase()));
+                const newIcons = parsed.filter(i => !existingNames.has(i.name.toLowerCase()));
+                state.icons = [...state.icons, ...newIcons];
+              }
+              // Clean up legacy key
+              localStorage.removeItem(LEGACY_KEYS.brandIcons);
             }
+
+            // Migrate from 'customBrandIcons' (older format)
+            const customIcons = localStorage.getItem(LEGACY_KEYS.customBrandIcons);
+            if (customIcons && state.icons.length === 0) {
+              const parsed = JSON.parse(customIcons) as BrandIcon[];
+              if (Array.isArray(parsed)) {
+                state.icons = parsed;
+              }
+              localStorage.removeItem(LEGACY_KEYS.customBrandIcons);
+            }
+
+            // Migrate profiles
+            const legacyProfiles = localStorage.getItem(LEGACY_KEYS.storeProfiles);
             if (legacyProfiles && state.profiles.length === 0) {
-              state.profiles = JSON.parse(legacyProfiles);
+              const parsed = JSON.parse(legacyProfiles);
+              if (Array.isArray(parsed)) {
+                state.profiles = parsed;
+              }
+              localStorage.removeItem(LEGACY_KEYS.storeProfiles);
             }
+
+            // Migrate active profile ID
+            const legacyActiveId = localStorage.getItem(LEGACY_KEYS.activeStoreId);
             if (legacyActiveId && !state.activeProfileId) {
               state.activeProfileId = JSON.parse(legacyActiveId);
+              localStorage.removeItem(LEGACY_KEYS.activeStoreId);
             }
-
-            return state;
           } catch {
-            return persistedState;
+            // Ignore parse errors, keep existing state
           }
         }
-        return persistedState;
+
+        return state;
       },
-      version: 1,
+      version: 2,
+      // Run migration check on every rehydration to catch any leftover legacy data
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+
+        // Check for any remaining legacy data and migrate it
+        try {
+          const appLegacyIcons = localStorage.getItem(LEGACY_KEYS.brandIcons);
+          if (appLegacyIcons) {
+            const parsed = JSON.parse(appLegacyIcons) as BrandIcon[];
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              // Import and clean up
+              state.importIcons(parsed);
+              localStorage.removeItem(LEGACY_KEYS.brandIcons);
+            }
+          }
+        } catch {
+          // Ignore errors
+        }
+      },
     }
   )
 );

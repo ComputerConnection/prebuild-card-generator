@@ -47,9 +47,9 @@ interface ConfigState {
 
   // Field-specific setters
   setModelName: (name: string) => void;
-  setPrice: (price: string) => void;
+  setPrice: (price: number) => void;
   setComponent: (category: ComponentCategory, value: string) => void;
-  setComponentPrice: (category: ComponentCategory, price: string) => void;
+  setComponentPrice: (category: ComponentCategory, price: number) => void;
   setStoreName: (name: string) => void;
   setStoreLogo: (logo: string | null) => void;
   setSku: (sku: string) => void;
@@ -63,9 +63,9 @@ interface ConfigState {
   setColorTheme: (theme: ColorTheme) => void;
   setCustomColors: (colors: ThemeColors) => void;
   setShowComponentPrices: (show: boolean) => void;
-  setStockStatus: (status: StockStatus) => void;
+  setStockStatus: (status: StockStatus | null) => void;
   setStockQuantity: (quantity: string) => void;
-  setCondition: (condition: ConditionType) => void;
+  setCondition: (condition: ConditionType | null) => void;
   setSaleInfo: (info: Partial<SaleInfo>) => void;
   setFinancingInfo: (info: Partial<FinancingInfo>) => void;
   setVisualSettings: (settings: Partial<VisualSettings>) => void;

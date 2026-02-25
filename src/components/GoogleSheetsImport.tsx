@@ -9,12 +9,22 @@ interface GoogleSheetsImportProps {
 
 export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImportProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const autoCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const baseId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [sheetUrl, setSheetUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [importedCount, setImportedCount] = useState<number | null>(null);
+
+  // Clean up auto-close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCloseTimerRef.current) {
+        clearTimeout(autoCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleImport = async () => {
     if (!sheetUrl.trim()) {
@@ -39,10 +49,11 @@ export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImpo
     if (result.success && result.builds) {
       setImportedCount(result.builds.length);
       onImport(result.builds);
-      setTimeout(() => {
+      autoCloseTimerRef.current = setTimeout(() => {
         setIsOpen(false);
         setSheetUrl('');
         setImportedCount(null);
+        autoCloseTimerRef.current = null;
       }, 1500);
     } else {
       setError(result.error || 'Import failed');

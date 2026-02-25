@@ -4,7 +4,7 @@
  * Optimized with shallow selectors to prevent unnecessary re-renders
  */
 
-import { useCallback } from 'react';
+import { useCallback, lazy, Suspense } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { MainLayout } from './components/layout';
 import {
@@ -16,16 +16,31 @@ import {
   ComponentsForm,
   AdditionalDetailsForm,
 } from './components/forms';
-import { PresetManager } from './components/PresetManager';
 import { PrintQueue } from './components/PrintQueue';
 import { CardPreview } from './components/CardPreview';
-import { PDFExporter } from './components/PDFExporter';
-import { BrandIconManager } from './components/BrandIconManager';
-import { VisualSettingsComponent } from './components/VisualSettings';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+
+// Lazy load heavy components that aren't needed for initial render
+const PresetManager = lazy(() =>
+  import('./components/PresetManager').then((m) => ({ default: m.PresetManager }))
+);
+const PDFExporter = lazy(() =>
+  import('./components/PDFExporter').then((m) => ({ default: m.PDFExporter }))
+);
+const BrandIconManager = lazy(() =>
+  import('./components/BrandIconManager').then((m) => ({ default: m.BrandIconManager }))
+);
+const VisualSettingsComponent = lazy(() =>
+  import('./components/VisualSettings').then((m) => ({ default: m.VisualSettingsComponent }))
+);
 import { useConfigStore, useUIStore, useBrandIconsStore, usePrintQueueStore } from './stores';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { VisualSettings } from './types';
+import type { VisualSettings } from './types';
+
+// Fallback for lazy-loaded components
+const LazyFallback = () => (
+  <div className="animate-pulse bg-gray-100 rounded-lg h-24" />
+);
 
 function App() {
   // Use shallow selectors to prevent unnecessary re-renders
@@ -44,7 +59,9 @@ function App() {
       setCardSize: state.setCardSize,
     }))
   );
-  const brandIcons = useBrandIconsStore((state) => state.icons);
+  const { brandIcons } = useBrandIconsStore(
+    useShallow((state) => ({ brandIcons: state.icons }))
+  );
   const addMultipleToQueue = usePrintQueueStore((state) => state.addMultipleToQueue);
 
   // Keyboard shortcuts
@@ -102,35 +119,43 @@ function App() {
         {/* Right Column - Preview & Export */}
         <div className="space-y-6">
           <ErrorBoundary compact>
-            <PresetManager
-              currentConfig={config}
-              onLoadPreset={loadConfig}
-              onPrintQueue={addMultipleToQueue}
-            />
+            <Suspense fallback={<LazyFallback />}>
+              <PresetManager
+                currentConfig={config}
+                onLoadPreset={loadConfig}
+                onPrintQueue={addMultipleToQueue}
+              />
+            </Suspense>
           </ErrorBoundary>
           <ErrorBoundary compact>
             <PrintQueue />
           </ErrorBoundary>
           <ErrorBoundary compact>
-            <VisualSettingsComponent
-              settings={config.visualSettings}
-              sku={config.sku}
-              onChange={handleVisualSettingsChange}
-            />
+            <Suspense fallback={<LazyFallback />}>
+              <VisualSettingsComponent
+                settings={config.visualSettings}
+                sku={config.sku}
+                onChange={handleVisualSettingsChange}
+              />
+            </Suspense>
           </ErrorBoundary>
           <ErrorBoundary compact>
-            <BrandIconManager />
+            <Suspense fallback={<LazyFallback />}>
+              <BrandIconManager />
+            </Suspense>
           </ErrorBoundary>
           <ErrorBoundary compact>
             <CardPreview config={config} cardSize={cardSize} brandIcons={brandIcons} />
           </ErrorBoundary>
           <ErrorBoundary compact>
-            <PDFExporter
-              config={config}
-              cardSize={cardSize}
-              onCardSizeChange={setCardSize}
-              brandIcons={brandIcons}
-            />
+            <Suspense fallback={<LazyFallback />}>
+              <PDFExporter
+                config={config}
+                cardSize={cardSize}
+                onCardSizeChange={setCardSize}
+                brandIcons={brandIcons}
+              />
+            </Suspense>
           </ErrorBoundary>
         </div>
       </div>

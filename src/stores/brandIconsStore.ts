@@ -136,6 +136,11 @@ export const useBrandIconsStore = create<BrandIconsState>()(
       migrate: (persistedState, version) => {
         const state = persistedState as BrandIconsState;
 
+        // Validate persisted state shape
+        if (!state || !Array.isArray(state.icons)) {
+          return { icons: [], profiles: [], activeProfileId: null } as unknown as BrandIconsState;
+        }
+
         // Version 0 -> 1: Migrate from old localStorage keys
         if (version === 0 || version === 1) {
           try {
@@ -209,3 +214,16 @@ export const useBrandIconsStore = create<BrandIconsState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select all brand icons */
+export const selectIcons = (state: BrandIconsState) => state.icons;
+
+/** Select all store profiles */
+export const selectProfiles = (state: BrandIconsState) => state.profiles;
+
+/** Select the active profile ID */
+export const selectActiveProfileId = (state: BrandIconsState) => state.activeProfileId;

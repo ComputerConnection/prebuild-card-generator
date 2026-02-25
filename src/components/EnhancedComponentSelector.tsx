@@ -83,12 +83,13 @@ export const EnhancedComponentSelector = memo(function EnhancedComponentSelector
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Get data
-  const brands = getBrandsForCategory(library, category);
-  const allComponents = getComponents(library, category);
-  const filteredByBrand = selectedBrand
-    ? getComponents(library, category, selectedBrand)
-    : allComponents;
+  // Get data - memoized to avoid recomputing on every render
+  const brands = useMemo(() => getBrandsForCategory(library, category), [library, category]);
+  const allComponents = useMemo(() => getComponents(library, category), [library, category]);
+  const filteredByBrand = useMemo(
+    () => (selectedBrand ? getComponents(library, category, selectedBrand) : allComponents),
+    [library, category, selectedBrand, allComponents]
+  );
 
   // Filter by search
   const filteredComponents = useMemo(() => {

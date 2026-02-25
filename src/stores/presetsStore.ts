@@ -131,21 +131,32 @@ export const usePresetsStore = create<PresetsState>()(
 
       importPresets: (json) => {
         try {
-          const imported = JSON.parse(json) as Preset[];
-          if (!Array.isArray(imported)) return 0;
+          const imported = JSON.parse(json);
+          if (!Array.isArray(imported)) {
+            console.warn('[PresetsStore] Import failed: data is not an array');
+            return 0;
+          }
 
-          const newPresets = imported.map((p) => ({
-            ...p,
-            id: generateId(), // Generate new IDs to avoid conflicts
-            createdAt: Date.now(),
-          }));
+          const newPresets = imported
+            .filter((p): p is Preset => p && typeof p === 'object' && 'name' in p)
+            .map((p) => ({
+              ...p,
+              id: generateId(), // Generate new IDs to avoid conflicts
+              createdAt: Date.now(),
+            }));
+
+          if (newPresets.length === 0) {
+            console.warn('[PresetsStore] Import failed: no valid presets found in data');
+            return 0;
+          }
 
           set((state) => ({
             presets: [...state.presets, ...newPresets],
           }));
 
           return newPresets.length;
-        } catch {
+        } catch (error) {
+          console.error('[PresetsStore] Import failed: invalid JSON', error);
           return 0;
         }
       },
@@ -184,3 +195,16 @@ export const usePresetsStore = create<PresetsState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select all presets */
+export const selectPresets = (state: PresetsState) => state.presets;
+
+/** Select all folders */
+export const selectFolders = (state: PresetsState) => state.folders;
+
+/** Select preset count */
+export const selectPresetCount = (state: PresetsState) => state.presets.length;

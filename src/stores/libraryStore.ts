@@ -221,3 +221,18 @@ export const useLibraryStore = create<LibraryState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select the component library */
+export const selectLibrary = (state: LibraryState) => state.library;
+
+/** Select components filtered by category */
+export const selectComponentsByCategory = (category: ComponentCategory) => (state: LibraryState) =>
+  state.library.components.filter((c) => c.category === category);
+
+/** Select custom components only */
+export const selectCustomComponents = (state: LibraryState) =>
+  state.library.components.filter((c) => c.isCustom);

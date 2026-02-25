@@ -42,7 +42,11 @@ export function PresetManager({ currentConfig, onLoadPreset, onPrintQueue }: Pre
 
   const savePresets = (newPresets: Preset[]) => {
     setPresets(newPresets);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newPresets));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newPresets));
+    } catch {
+      console.error('Failed to save presets (storage quota may be exceeded)');
+    }
   };
 
   const handleSavePreset = () => {

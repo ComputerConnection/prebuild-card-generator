@@ -218,7 +218,14 @@ export async function importFromGoogleSheet(urlOrId: string): Promise<{
 
     // Use a CORS proxy for public sheets
     // Note: The sheet must be publicly accessible (Share > Anyone with link)
-    const response = await fetch(csvUrl);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    let response: Response;
+    try {
+      response = await fetch(csvUrl, { signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
       if (response.status === 403 || response.status === 401) {
@@ -228,6 +235,11 @@ export async function importFromGoogleSheet(urlOrId: string): Promise<{
         };
       }
       return { success: false, error: `Failed to fetch sheet: ${response.statusText}` };
+    }
+
+    const contentLength = response.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > 5 * 1024 * 1024) {
+      return { success: false, error: 'Sheet data exceeds maximum size (5MB)' };
     }
 
     const text = await response.text();
@@ -287,10 +299,15 @@ export function exportToCSV(builds: PrebuildConfig[]): string {
   ];
 
   const escapeCell = (value: string) => {
-    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-      return `"${value.replace(/"/g, '""')}"`;
+    let escaped = value;
+    // Prevent formula injection in spreadsheets
+    if (/^[=+\-@\t\r]/.test(escaped)) {
+      escaped = `'${escaped}`;
     }
-    return value;
+    if (escaped.includes(',') || escaped.includes('"') || escaped.includes('\n')) {
+      return `"${escaped.replace(/"/g, '""')}"`;
+    }
+    return escaped;
   };
 
   const rows = builds.map((build) =>

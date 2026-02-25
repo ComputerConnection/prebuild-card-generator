@@ -17,7 +17,9 @@ interface PDFExporterProps {
 
 const ALL_SIZES: CardSize[] = ['shelf', 'price', 'poster'];
 
-// Module cache for lazy-loaded PDF functions
+type GeneratingMode = 'idle' | 'single' | 'all' | 'shelf-multi' | 'price-multi' | 'email-prep' | 'loading';
+
+// Module cache for lazy-loaded PDF functions — only cache successes
 let pdfModule: typeof import('../utils/pdfGenerator') | null = null;
 
 // Preload PDF module (called on hover)
@@ -34,31 +36,38 @@ export const PDFExporter = memo(function PDFExporter({
   onCardSizeChange,
   brandIcons,
 }: PDFExporterProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
-  const [isGeneratingShelfMultiUp, setIsGeneratingShelfMultiUp] = useState(false);
-  const [isGeneratingPriceMultiUp, setIsGeneratingPriceMultiUp] = useState(false);
+  const [generatingMode, setGeneratingMode] = useState<GeneratingMode>('idle');
   const [batchProgress, setBatchProgress] = useState(0);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [currentPdf, setCurrentPdf] = useState<jsPDF | null>(null);
-  const [isPreparingEmail, setIsPreparingEmail] = useState(false);
-  const [isLoadingModule, setIsLoadingModule] = useState(false);
+
+  // Derived state from the enum
+  const isGenerating = generatingMode === 'single';
+  const isGeneratingAll = generatingMode === 'all';
+  const isGeneratingShelfMultiUp = generatingMode === 'shelf-multi';
+  const isGeneratingPriceMultiUp = generatingMode === 'price-multi';
+  const isPreparingEmail = generatingMode === 'email-prep';
+  const isLoadingModule = generatingMode === 'loading';
   const baseId = useId();
 
   // Lazy load the PDF generator module
   const loadPDFModule = useCallback(async () => {
     if (pdfModule) return pdfModule;
-    setIsLoadingModule(true);
+    setGeneratingMode('loading');
     try {
       pdfModule = await import('../utils/pdfGenerator');
       return pdfModule;
+    } catch (error) {
+      // Don't cache failed imports
+      pdfModule = null;
+      throw error;
     } finally {
-      setIsLoadingModule(false);
+      setGeneratingMode('idle');
     }
   }, []);
 
   const handleExport = useCallback(async () => {
-    setIsGenerating(true);
+    setGeneratingMode('single');
     try {
       const { generatePDF, downloadPDF } = await loadPDFModule();
       const doc = await generatePDF(config, cardSize, brandIcons);
@@ -68,12 +77,12 @@ export const PDFExporter = memo(function PDFExporter({
       console.error('Failed to generate PDF:', error);
       alert('Failed to generate PDF. Please try again.');
     } finally {
-      setIsGenerating(false);
+      setGeneratingMode('idle');
     }
   }, [config, cardSize, brandIcons, loadPDFModule]);
 
   const handleExportAll = useCallback(async () => {
-    setIsGeneratingAll(true);
+    setGeneratingMode('all');
     setBatchProgress(0);
 
     try {
@@ -96,13 +105,13 @@ export const PDFExporter = memo(function PDFExporter({
       console.error('Failed to generate PDFs:', error);
       alert('Failed to generate PDFs. Please try again.');
     } finally {
-      setIsGeneratingAll(false);
+      setGeneratingMode('idle');
       setBatchProgress(0);
     }
   }, [config, brandIcons, loadPDFModule]);
 
   const handleExportShelfMultiUp = useCallback(async () => {
-    setIsGeneratingShelfMultiUp(true);
+    setGeneratingMode('shelf-multi');
     try {
       const { generateShelfTagMultiUp, downloadPDF } = await loadPDFModule();
       const doc = await generateShelfTagMultiUp(config, true, brandIcons);
@@ -112,12 +121,12 @@ export const PDFExporter = memo(function PDFExporter({
       console.error('Failed to generate multi-up PDF:', error);
       alert('Failed to generate PDF. Please try again.');
     } finally {
-      setIsGeneratingShelfMultiUp(false);
+      setGeneratingMode('idle');
     }
   }, [config, brandIcons, loadPDFModule]);
 
   const handleExportPriceMultiUp = useCallback(async () => {
-    setIsGeneratingPriceMultiUp(true);
+    setGeneratingMode('price-multi');
     try {
       const { generatePriceCardMultiUp, downloadPDF } = await loadPDFModule();
       const doc = await generatePriceCardMultiUp(config, true, brandIcons);
@@ -127,20 +136,14 @@ export const PDFExporter = memo(function PDFExporter({
       console.error('Failed to generate multi-up PDF:', error);
       alert('Failed to generate PDF. Please try again.');
     } finally {
-      setIsGeneratingPriceMultiUp(false);
+      setGeneratingMode('idle');
     }
   }, [config, brandIcons, loadPDFModule]);
 
-  const isDisabled =
-    isGenerating ||
-    isGeneratingAll ||
-    isGeneratingShelfMultiUp ||
-    isGeneratingPriceMultiUp ||
-    isPreparingEmail ||
-    isLoadingModule;
+  const isDisabled = generatingMode !== 'idle';
 
   const handlePrepareEmail = useCallback(async () => {
-    setIsPreparingEmail(true);
+    setGeneratingMode('email-prep');
     try {
       const { generatePDF } = await loadPDFModule();
       const doc = await generatePDF(config, cardSize, brandIcons);
@@ -150,7 +153,7 @@ export const PDFExporter = memo(function PDFExporter({
       console.error('Failed to generate PDF for email:', error);
       alert('Failed to prepare PDF. Please try again.');
     } finally {
-      setIsPreparingEmail(false);
+      setGeneratingMode('idle');
     }
   }, [config, cardSize, brandIcons, loadPDFModule]);
 

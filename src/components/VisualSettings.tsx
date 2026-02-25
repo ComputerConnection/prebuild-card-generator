@@ -30,22 +30,33 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
   const [errors, setErrors] = useState<FormErrors>({});
   const productImageRef = useRef<HTMLInputElement>(null);
 
-  // Generate QR preview when URL changes
+  // Generate QR preview when URL changes (debounced)
   useEffect(() => {
-    if (settings.showQrCode && settings.qrCodeUrl) {
-      generateQRCodeDataUrl(settings.qrCodeUrl, 80).then(setQrPreview);
-    } else {
+    if (!settings.showQrCode || !settings.qrCodeUrl) {
       setQrPreview('');
+      return;
     }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      generateQRCodeDataUrl(settings.qrCodeUrl, 80).then((url) => {
+        if (!cancelled) setQrPreview(url);
+      }).catch(() => {
+        if (!cancelled) setQrPreview('');
+      });
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [settings.showQrCode, settings.qrCodeUrl]);
 
-  // Generate barcode preview when SKU changes
+  // Generate barcode preview when SKU changes (debounced)
   useEffect(() => {
-    if (sku && isValidBarcode(sku)) {
-      setBarcodePreview(generateBarcodeDataUrl(sku, { height: 30, displayValue: false }));
-    } else {
+    if (!sku || !isValidBarcode(sku)) {
       setBarcodePreview('');
+      return;
     }
+    const timer = setTimeout(() => {
+      setBarcodePreview(generateBarcodeDataUrl(sku, { height: 30, displayValue: false }));
+    }, 300);
+    return () => clearTimeout(timer);
   }, [sku]);
 
   const handleQrUrlChange = useCallback(

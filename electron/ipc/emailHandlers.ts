@@ -5,11 +5,29 @@ import { saveEncryptedCredential, getEncryptedCredential } from './storeHandlers
 
 const SMTP_CONFIG_KEY = 'smtp-config';
 
+function validateSmtpConfig(config: SmtpConfig): string | null {
+  if (!config.host || typeof config.host !== 'string' || config.host.length > 253) {
+    return 'Invalid SMTP host';
+  }
+  if (typeof config.port !== 'number' || config.port < 1 || config.port > 65535) {
+    return 'Invalid SMTP port (must be 1-65535)';
+  }
+  if (!config.user || typeof config.user !== 'string') {
+    return 'Invalid SMTP user';
+  }
+  return null;
+}
+
 export function registerEmailHandlers(): void {
   // ── Send email ───────────────────────────────────────────
   ipcMain.handle(
     'email:send',
     async (_event, config: SmtpConfig, message: EmailMessage) => {
+      const validationError = validateSmtpConfig(config);
+      if (validationError) {
+        return { success: false, error: validationError };
+      }
+
       try {
         const transporter = nodemailer.createTransport({
           host: config.host,
@@ -49,6 +67,11 @@ export function registerEmailHandlers(): void {
   ipcMain.handle(
     'email:testConnection',
     async (_event, config: SmtpConfig) => {
+      const validationError = validateSmtpConfig(config);
+      if (validationError) {
+        return { success: false, error: validationError };
+      }
+
       try {
         const transporter = nodemailer.createTransport({
           host: config.host,

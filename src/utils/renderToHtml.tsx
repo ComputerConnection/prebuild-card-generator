@@ -439,7 +439,6 @@ function renderElement(el: LayoutElement, ctx: RenderContext): React.ReactNode {
       return renderFooterAccent(el, scale);
     case 'badge':
     case 'divider':
-    case 'container':
       // Not yet implemented - fallback to null
       return null;
     default:

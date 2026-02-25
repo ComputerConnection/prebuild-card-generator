@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { PrebuildConfig, BrandIcon, CardSize } from '../../../types';
+import type { PrebuildConfig, CardSize } from '../../../types';
 import { CARD_SIZES } from '../../../types';
 
 // ============================================================================
@@ -160,17 +160,6 @@ function createTestConfig(overrides: Partial<PrebuildConfig> = {}): PrebuildConf
     condition: null,
     ...overrides,
   };
-}
-
-/**
- * Create test brand icons (kept for future use)
- */
-function _createTestBrandIcons(): BrandIcon[] {
-  return [
-    { name: 'Intel', image: 'data:image/png;base64,mockIntelIcon' },
-    { name: 'AMD', image: 'data:image/png;base64,mockAMDIcon' },
-    { name: 'NVIDIA', image: 'data:image/png;base64,mockNVIDIAIcon' },
-  ];
 }
 
 // ============================================================================

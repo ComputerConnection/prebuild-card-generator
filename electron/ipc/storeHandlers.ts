@@ -98,7 +98,7 @@ export function saveEncryptedCredential(key: string, value: string): void {
     const encrypted = safeStorage.encryptString(value);
     storeSet(credentialStore, key, encrypted.toString('base64'));
   } else {
-    storeSet(credentialStore, key, value);
+    throw new Error('Encryption is not available. Cannot store credentials securely.');
   }
 }
 
@@ -111,8 +111,8 @@ export function getEncryptedCredential(key: string): string | null {
       const buffer = Buffer.from(stored, 'base64');
       return safeStorage.decryptString(buffer);
     } catch {
-      return stored;
+      return null;
     }
   }
-  return stored;
+  return null;
 }

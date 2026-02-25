@@ -72,9 +72,7 @@ interface ConfigState {
   setVisualSettings: (settings: Partial<VisualSettings>) => void;
 }
 
-const pushToHistory = (state: ConfigState, _newConfig: PrebuildConfig): HistoryState => {
-  // _newConfig is passed for reference but we save current state before update
-  void _newConfig;
+const pushToHistory = (state: ConfigState): HistoryState => {
   const newPast = [...state.history.past, state.config];
   // Limit history size
   if (newPast.length > state.maxHistorySize) {
@@ -100,7 +98,7 @@ export const useConfigStore = create<ConfigState>()(
       setConfig: (partial) =>
         set((state) => {
           const newConfig = { ...state.config, ...partial };
-          const newHistory = pushToHistory(state, newConfig);
+          const newHistory = pushToHistory(state);
           state.config = newConfig;
           state.history = newHistory;
           state.canUndo = newHistory.past.length > 0;
@@ -110,7 +108,7 @@ export const useConfigStore = create<ConfigState>()(
       // Reset to default
       resetConfig: () =>
         set((state) => {
-          const newHistory = pushToHistory(state, { ...defaultConfig } as PrebuildConfig);
+          const newHistory = pushToHistory(state);
           state.config = { ...defaultConfig } as PrebuildConfig;
           state.history = newHistory;
           state.canUndo = newHistory.past.length > 0;
@@ -121,7 +119,7 @@ export const useConfigStore = create<ConfigState>()(
       loadConfig: (config) =>
         set((state) => {
           const cloned = structuredClone(config);
-          const newHistory = pushToHistory(state, cloned);
+          const newHistory = pushToHistory(state);
           state.config = cloned;
           state.history = newHistory;
           state.canUndo = newHistory.past.length > 0;

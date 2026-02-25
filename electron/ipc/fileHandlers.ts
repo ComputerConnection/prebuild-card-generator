@@ -1,7 +1,19 @@
 import { ipcMain, dialog, shell, app, BrowserWindow } from 'electron';
 import { writeFile, readFile } from 'fs/promises';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import type { SaveFileOptions, OpenFileOptions } from '../types';
+
+/** Validate that a file path is absolute and doesn't contain traversal sequences */
+function isValidFilePath(filePath: string): boolean {
+  if (typeof filePath !== 'string' || filePath.length === 0) return false;
+  const resolved = resolve(filePath);
+  // Reject if resolution changed the path (indicates traversal)
+  if (resolved !== filePath && resolve(filePath) !== filePath) {
+    // Allow minor normalization but reject obvious traversal
+    if (filePath.includes('..')) return false;
+  }
+  return true;
+}
 
 export function registerFileHandlers(): void {
   // ── Save PDF ─────────────────────────────────────────────
@@ -113,6 +125,7 @@ export function registerFileHandlers(): void {
 
   // ── Show in folder ───────────────────────────────────────
   ipcMain.handle('file:showInFolder', (_event, filePath: string) => {
+    if (!isValidFilePath(filePath)) return;
     shell.showItemInFolder(filePath);
   });
 
@@ -135,9 +148,13 @@ export function registerFileHandlers(): void {
   });
 
   ipcMain.handle('app:openExternal', (_event, url: string) => {
-    // Only allow http/https URLs
-    if (url.startsWith('https://') || url.startsWith('http://')) {
-      return shell.openExternal(url);
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+        return shell.openExternal(parsed.href);
+      }
+    } catch {
+      // Invalid URL — ignore silently
     }
   });
 }

@@ -48,9 +48,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
       'react/prop-types': 'off',
       'react/no-unescaped-entities': 'warn',
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      // Relax this new rule - setState in useEffect for initialization/cleanup is valid
-      'react-hooks/set-state-in-effect': 'off',
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'react-hooks/set-state-in-effect': 'warn',
     },
   },
   prettier

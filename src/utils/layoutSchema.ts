@@ -249,17 +249,6 @@ export interface DividerElement extends BaseElement {
   };
 }
 
-/** Container element for grouping */
-export interface ContainerElement extends BaseElement {
-  type: 'container';
-  children: LayoutElement[];
-  direction: 'row' | 'column';
-  gap: number;
-  align: 'start' | 'center' | 'end' | 'stretch';
-  justify: 'start' | 'center' | 'end' | 'space-between' | 'space-around';
-  style?: BoxStyle;
-}
-
 /** Footer accent bar */
 export interface FooterAccentElement extends BaseElement {
   type: 'footer-accent';
@@ -286,7 +275,6 @@ export type LayoutElement =
   | QRCodeElement
   | SKUElement
   | DividerElement
-  | ContainerElement
   | FooterAccentElement;
 
 // ============================================================================

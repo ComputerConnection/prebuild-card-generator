@@ -1,7 +1,8 @@
 import { ipcMain, BrowserWindow, shell } from 'electron';
-import { writeFile, unlink } from 'fs/promises';
+import { writeFile, unlink, chmod } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { randomUUID } from 'crypto';
 import type { PrintOptions } from '../types';
 
 export function registerPrintHandlers(): void {
@@ -36,8 +37,9 @@ export function registerPrintHandlers(): void {
     async (_event, pdfBytes: Uint8Array, options?: PrintOptions) => {
       try {
         // Write PDF to temp file
-        const tempPath = join(tmpdir(), `prebuild-print-${Date.now()}.pdf`);
+        const tempPath = join(tmpdir(), `prebuild-print-${randomUUID()}.pdf`);
         await writeFile(tempPath, Buffer.from(pdfBytes));
+        await chmod(tempPath, 0o600);
 
         // Create hidden window to load and print the PDF
         const printWindow = new BrowserWindow({
@@ -87,15 +89,16 @@ export function registerPrintHandlers(): void {
   ipcMain.handle('print:printPreview', async (_event, pdfBytes: Uint8Array) => {
     try {
       // Write PDF to temp file and open in system viewer
-      const tempPath = join(tmpdir(), `prebuild-preview-${Date.now()}.pdf`);
+      const tempPath = join(tmpdir(), `prebuild-preview-${randomUUID()}.pdf`);
       await writeFile(tempPath, Buffer.from(pdfBytes));
+      await chmod(tempPath, 0o600);
 
       await shell.openPath(tempPath);
 
-      // Schedule temp file cleanup after 60 seconds
+      // Schedule temp file cleanup after 10 seconds
       setTimeout(() => {
         unlink(tempPath).catch(() => {});
-      }, 60_000);
+      }, 10_000);
     } catch (err) {
       throw new Error(
         err instanceof Error ? err.message : 'Failed to open print preview'

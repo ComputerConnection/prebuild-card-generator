@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, session } from 'electron';
 import { join } from 'path';
 import { registerStoreHandlers } from './ipc/storeHandlers';
 import { registerFileHandlers } from './ipc/fileHandlers';
@@ -16,6 +16,15 @@ try {
 } catch {
   // Not using Squirrel installer — no action needed
 }
+
+// ── Uncaught exception handlers ──────────────────────────────
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
+});
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -77,6 +86,20 @@ function registerIpcHandlers(): void {
 
 // App lifecycle
 app.whenReady().then(() => {
+  // ── Content Security Policy ──────────────────────────────────
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const csp = process.env.VITE_DEV_SERVER_URL
+      ? "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws: wss: https:;"
+      : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https:;";
+
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [csp],
+      },
+    });
+  });
+
   registerIpcHandlers();
   createApplicationMenu();
   createWindow();

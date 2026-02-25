@@ -15,16 +15,16 @@ const DEFAULT_PREFIX = 'prebuild-card-generator';
 export class ElectronStoreAdapter implements StorageAdapter {
   private prefix: string;
   private cache: Map<string, unknown> = new Map();
-  private initialized: boolean = false;
+  private readyPromise: Promise<void>;
 
   constructor(options: StorageOptions = {}) {
     this.prefix = options.prefix || DEFAULT_PREFIX;
-    this.initCache();
+    this.readyPromise = this.initCache();
   }
 
   /**
    * Populate the local cache from the main process store.
-   * Called once on construction.
+   * Called once on construction; the result is stored as readyPromise.
    */
   private async initCache(): Promise<void> {
     if (!window.electronAPI) return;
@@ -34,7 +34,6 @@ export class ElectronStoreAdapter implements StorageAdapter {
       for (const [key, value] of Object.entries(allData)) {
         this.cache.set(key, value);
       }
-      this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize electron store cache:', error);
     }
@@ -129,13 +128,7 @@ export class ElectronStoreAdapter implements StorageAdapter {
    * Call this before first read if you need guaranteed fresh data.
    */
   async waitForInit(): Promise<void> {
-    if (this.initialized) return;
-    // Poll until initialized (max 5 seconds)
-    let attempts = 0;
-    while (!this.initialized && attempts < 50) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      attempts++;
-    }
+    return this.readyPromise;
   }
 
   /**

@@ -63,13 +63,13 @@ export const EnhancedComponentSelector = memo(function EnhancedComponentSelector
   // Save favorites
   const saveFavorites = (newFavorites: Record<string, string[]>) => {
     setFavorites(newFavorites);
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+    try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites)); } catch { /* quota exceeded */ }
   };
 
   // Save recent
   const saveRecent = (newRecent: Record<string, string[]>) => {
     setRecent(newRecent);
-    localStorage.setItem(RECENT_KEY, JSON.stringify(newRecent));
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(newRecent)); } catch { /* quota exceeded */ }
   };
 
   // Close dropdown when clicking outside

@@ -4,6 +4,7 @@
  */
 
 import { useId } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useConfigStore } from '../../stores';
 import { ColorTheme, THEME_PRESETS } from '../../types';
 import {
@@ -102,13 +103,19 @@ function ContrastBadge({ ratio }: { ratio: number }) {
 }
 
 export function ColorThemeSelector() {
-  const { config, setConfig } = useConfigStore();
+  const { colorTheme, customColors, setConfig } = useConfigStore(
+    useShallow((state) => ({
+      colorTheme: state.config.colorTheme,
+      customColors: state.config.customColors,
+      setConfig: state.setConfig,
+    }))
+  );
   const baseId = useId();
 
   const handleThemeChange = (theme: ColorTheme) => {
     setConfig({
       colorTheme: theme,
-      customColors: theme === 'custom' ? config.customColors : THEME_PRESETS[theme],
+      customColors: theme === 'custom' ? customColors : THEME_PRESETS[theme],
     });
   };
 
@@ -128,9 +135,9 @@ export function ColorThemeSelector() {
             key={theme.value}
             onClick={() => handleThemeChange(theme.value)}
             role="radio"
-            aria-checked={config.colorTheme === theme.value}
+            aria-checked={colorTheme === theme.value}
             className={`flex items-center gap-2 px-3 py-2 rounded-md border-2 transition-colors ${
-              config.colorTheme === theme.value
+              colorTheme === theme.value
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
@@ -145,7 +152,7 @@ export function ColorThemeSelector() {
       </div>
 
       {/* Custom color pickers */}
-      {config.colorTheme === 'custom' && (
+      {colorTheme === 'custom' && (
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -159,10 +166,10 @@ export function ColorThemeSelector() {
                 <input
                   id={`${baseId}-primary`}
                   type="color"
-                  value={config.customColors.primary}
+                  value={customColors.primary}
                   onChange={(e) =>
                     setConfig({
-                      customColors: { ...config.customColors, primary: e.target.value },
+                      customColors: { ...customColors, primary: e.target.value },
                     })
                   }
                   className="w-full h-10 rounded cursor-pointer"
@@ -171,10 +178,10 @@ export function ColorThemeSelector() {
               </div>
               <div className="mt-1 flex items-center gap-2" id={`${baseId}-primary-contrast`}>
                 <span className="text-xs text-gray-500">vs white:</span>
-                <ContrastBadge ratio={checkContrast(config.customColors.primary, '#ffffff')} />
+                <ContrastBadge ratio={checkContrast(customColors.primary, '#ffffff')} />
               </div>
               <ContrastWarning
-                color={config.customColors.primary}
+                color={customColors.primary}
                 label="Primary"
                 backgroundColors={[{ name: 'white', hex: '#ffffff' }]}
               />
@@ -190,10 +197,10 @@ export function ColorThemeSelector() {
                 <input
                   id={`${baseId}-accent`}
                   type="color"
-                  value={config.customColors.accent}
+                  value={customColors.accent}
                   onChange={(e) =>
                     setConfig({
-                      customColors: { ...config.customColors, accent: e.target.value },
+                      customColors: { ...customColors, accent: e.target.value },
                     })
                   }
                   className="w-full h-10 rounded cursor-pointer"
@@ -202,10 +209,10 @@ export function ColorThemeSelector() {
               </div>
               <div className="mt-1 flex items-center gap-2" id={`${baseId}-accent-contrast`}>
                 <span className="text-xs text-gray-500">vs white:</span>
-                <ContrastBadge ratio={checkContrast(config.customColors.accent, '#ffffff')} />
+                <ContrastBadge ratio={checkContrast(customColors.accent, '#ffffff')} />
               </div>
               <ContrastWarning
-                color={config.customColors.accent}
+                color={customColors.accent}
                 label="Accent"
                 backgroundColors={[{ name: 'white', hex: '#ffffff' }]}
               />
@@ -221,10 +228,10 @@ export function ColorThemeSelector() {
                 <input
                   id={`${baseId}-price`}
                   type="color"
-                  value={config.customColors.priceColor}
+                  value={customColors.priceColor}
                   onChange={(e) =>
                     setConfig({
-                      customColors: { ...config.customColors, priceColor: e.target.value },
+                      customColors: { ...customColors, priceColor: e.target.value },
                     })
                   }
                   className="w-full h-10 rounded cursor-pointer"
@@ -233,10 +240,10 @@ export function ColorThemeSelector() {
               </div>
               <div className="mt-1 flex items-center gap-2" id={`${baseId}-price-contrast`}>
                 <span className="text-xs text-gray-500">vs white:</span>
-                <ContrastBadge ratio={checkContrast(config.customColors.priceColor, '#ffffff')} />
+                <ContrastBadge ratio={checkContrast(customColors.priceColor, '#ffffff')} />
               </div>
               <ContrastWarning
-                color={config.customColors.priceColor}
+                color={customColors.priceColor}
                 label="Price"
                 backgroundColors={[{ name: 'white', hex: '#ffffff' }]}
               />
@@ -250,8 +257,8 @@ export function ColorThemeSelector() {
               <div
                 className="px-3 py-1 rounded text-sm font-medium"
                 style={{
-                  backgroundColor: config.customColors.primary,
-                  color: getAccessibleTextColor(config.customColors.primary),
+                  backgroundColor: customColors.primary,
+                  color: getAccessibleTextColor(customColors.primary),
                 }}
               >
                 Primary Badge
@@ -259,13 +266,13 @@ export function ColorThemeSelector() {
               <div
                 className="px-3 py-1 rounded text-sm font-medium"
                 style={{
-                  backgroundColor: config.customColors.accent,
-                  color: getAccessibleTextColor(config.customColors.accent),
+                  backgroundColor: customColors.accent,
+                  color: getAccessibleTextColor(customColors.accent),
                 }}
               >
                 Accent Text
               </div>
-              <span className="text-lg font-bold" style={{ color: config.customColors.priceColor }}>
+              <span className="text-lg font-bold" style={{ color: customColors.priceColor }}>
                 $1,299
               </span>
             </div>

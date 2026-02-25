@@ -11,11 +11,15 @@ import * as googleSheetsUtils from '../../../utils/googleSheets';
 import type { PrebuildConfig } from '../../../types';
 import { defaultConfig } from '../../../data/componentOptions';
 
-// Mock the googleSheets utilities
-vi.mock('../../../utils/googleSheets', () => ({
-  importFromGoogleSheet: vi.fn(),
-  downloadCSV: vi.fn(),
-}));
+// Mock the googleSheets utilities (keep extractSheetId real for URL validation)
+vi.mock('../../../utils/googleSheets', async (importOriginal) => {
+  const actual = await importOriginal<typeof googleSheetsUtils>();
+  return {
+    ...actual,
+    importFromGoogleSheet: vi.fn(),
+    downloadCSV: vi.fn(),
+  };
+});
 
 describe('GoogleSheetsImport', () => {
   const mockOnImport = vi.fn();
@@ -72,7 +76,7 @@ describe('GoogleSheetsImport', () => {
       expect(screen.getByText('Google Sheets Sync')).toBeInTheDocument();
 
       // Find and click close button
-      const closeButton = screen.getByRole('button', { name: '' });
+      const closeButton = screen.getByRole('button', { name: /close/i });
       await user.click(closeButton);
 
       await waitFor(() => {
@@ -154,7 +158,7 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://test.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/abc123');
       await user.click(screen.getByText('Import Builds'));
 
       expect(screen.getByText('Importing...')).toBeInTheDocument();
@@ -174,7 +178,7 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://test.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/abc123');
       await user.click(screen.getByText('Import Builds'));
 
       await waitFor(() => {
@@ -194,7 +198,7 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://test.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/abc123');
       await user.click(screen.getByText('Import Builds'));
 
       await waitFor(() => {
@@ -213,7 +217,7 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://test.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/abc123');
       await user.click(screen.getByText('Import Builds'));
 
       await waitFor(() => {
@@ -234,7 +238,7 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://test.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/abc123');
       await user.click(screen.getByText('Import Builds'));
 
       // Wait for success message
@@ -337,7 +341,22 @@ describe('GoogleSheetsImport', () => {
   });
 
   describe('edge cases', () => {
-    it('should clear error when URL is changed', async () => {
+    it('should show validation error for invalid URL format', async () => {
+      const user = userEvent.setup();
+
+      render(<GoogleSheetsImport onImport={mockOnImport} />);
+
+      await user.click(screen.getByText('Sheets'));
+
+      // Trigger URL validation error with a non-Google-Sheets URL
+      const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
+      await user.type(input, 'https://bad.com');
+      await user.click(screen.getByText('Import Builds'));
+
+      expect(screen.getByText(/Invalid Google Sheets URL/)).toBeInTheDocument();
+    });
+
+    it('should clear error when URL is changed and re-imported', async () => {
       const user = userEvent.setup();
       vi.mocked(googleSheetsUtils.importFromGoogleSheet).mockResolvedValue({
         success: false,
@@ -348,18 +367,14 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
 
-      // Trigger error
+      // Trigger error with a valid URL format
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://bad.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/badsheet');
       await user.click(screen.getByText('Import Builds'));
 
       await waitFor(() => {
         expect(screen.getByText('Error occurred')).toBeInTheDocument();
       });
-
-      // Clear and type new URL
-      await user.clear(input);
-      await user.type(input, 'https://new.com');
 
       // The error stays until next import attempt, which is expected behavior
     });
@@ -375,7 +390,7 @@ describe('GoogleSheetsImport', () => {
 
       await user.click(screen.getByText('Sheets'));
       const input = screen.getByPlaceholderText('https://docs.google.com/spreadsheets/d/...');
-      await user.type(input, 'https://test.com');
+      await user.type(input, 'https://docs.google.com/spreadsheets/d/abc123');
       await user.click(screen.getByText('Import Builds'));
 
       await waitFor(() => {

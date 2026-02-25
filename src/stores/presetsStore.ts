@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Preset, PresetFolder, PrebuildConfig } from '../types';
 import { DEFAULT_FOLDERS } from '../types';
+import { zustandStorage } from '../lib/storage/zustandStorage';
 
 interface PresetsState {
   // Presets
@@ -73,6 +74,7 @@ export const usePresetsStore = create<PresetsState>()(
           ...original,
           id: generateId(),
           name: `${original.name} (Copy)`,
+          config: structuredClone(original.config),
           createdAt: Date.now(),
         };
         set((state) => ({ presets: [...state.presets, duplicate] }));
@@ -150,6 +152,7 @@ export const usePresetsStore = create<PresetsState>()(
     }),
     {
       name: 'prebuild-presets-store',
+      storage: zustandStorage,
       // Migrate from old localStorage keys
       migrate: (persistedState, version) => {
         if (version === 0) {

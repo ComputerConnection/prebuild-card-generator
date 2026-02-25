@@ -17,12 +17,12 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "electron:dev": "ELECTRON=true vite --mode electron",
-    "electron:build": "tsc && ELECTRON=true vite build --mode electron && electron-builder",
-    "electron:build:win": "tsc && ELECTRON=true vite build --mode electron && electron-builder --win",
-    "electron:build:mac": "tsc && ELECTRON=true vite build --mode electron && electron-builder --mac",
-    "electron:build:linux": "tsc && ELECTRON=true vite build --mode electron && electron-builder --linux",
-    "electron:preview": "ELECTRON=true vite build --mode electron && electron ."
+    "electron:dev": "cross-env ELECTRON=true vite --mode electron",
+    "electron:build": "tsc && cross-env ELECTRON=true vite build --mode electron && electron-builder",
+    "electron:build:win": "tsc && cross-env ELECTRON=true vite build --mode electron && electron-builder --win",
+    "electron:build:mac": "tsc && cross-env ELECTRON=true vite build --mode electron && electron-builder --mac",
+    "electron:build:linux": "tsc && cross-env ELECTRON=true vite build --mode electron && electron-builder --linux",
+    "electron:preview": "cross-env ELECTRON=true vite build --mode electron && electron ."
   },
   "dependencies": {
     "electron-store": "^11.0.2",
@@ -51,6 +51,7 @@
     "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "electron": "^40.6.1",
     "electron-builder": "^26.8.1",
     "eslint": "^9.39.2",

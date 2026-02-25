@@ -3,16 +3,26 @@
  */
 
 import { useRef, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useConfigStore } from '../../stores';
 import { GoogleSheetsImport } from '../GoogleSheetsImport';
-import { defaultConfig, defaultComponentPrices } from '../../data/componentOptions';
-import type { PrebuildConfig, ComponentCategory } from '../../types';
-import { parsePrice } from '../../types';
+import type { PrebuildConfig } from '../../types';
+import { parseCSV, parseSheetData } from '../../utils/googleSheets';
 import { SHORTCUT_LABELS } from '../../hooks/useKeyboardShortcuts';
 import { env } from '../../config/env';
 
 export function Header() {
-  const { config, setConfig, resetConfig, undo, redo, canUndo, canRedo } = useConfigStore();
+  const { config, setConfig, resetConfig, undo, redo, canUndo, canRedo } = useConfigStore(
+    useShallow((state) => ({
+      config: state.config,
+      setConfig: state.setConfig,
+      resetConfig: state.resetConfig,
+      undo: state.undo,
+      redo: state.redo,
+      canUndo: state.canUndo,
+      canRedo: state.canRedo,
+    }))
+  );
   const csvInputRef = useRef<HTMLInputElement>(null);
 
   // Handle Google Sheets import
@@ -49,7 +59,7 @@ export function Header() {
     [config, setConfig]
   );
 
-  // Handle CSV import
+  // Handle CSV import — uses the proper CSV parser that handles quoted fields
   const handleCSVImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -59,63 +69,14 @@ export function Header() {
       reader.onload = (event) => {
         try {
           const text = event.target?.result as string;
-          const lines = text.split('\n').filter((line) => line.trim());
-          if (lines.length < 2) {
+          const rows = parseCSV(text);
+
+          if (rows.length < 2) {
             alert('CSV must have a header row and at least one data row');
             return;
           }
 
-          const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
-          const builds: Partial<PrebuildConfig>[] = [];
-
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map((v) => v.trim());
-            const build: Partial<PrebuildConfig> = {
-              components: { ...defaultConfig.components },
-              componentPrices: { ...defaultComponentPrices },
-            };
-
-            headers.forEach((header, idx) => {
-              const value = values[idx] || '';
-              switch (header) {
-                case 'model':
-                case 'modelname':
-                case 'name':
-                  build.modelName = value;
-                  break;
-                case 'price':
-                  build.price = parsePrice(value);
-                  break;
-                case 'sku':
-                  build.sku = value;
-                  break;
-                case 'cpu':
-                case 'gpu':
-                case 'ram':
-                case 'storage':
-                case 'motherboard':
-                case 'psu':
-                case 'case':
-                case 'cooling':
-                  if (build.components) build.components[header as ComponentCategory] = value;
-                  break;
-                case 'os':
-                  build.os = value;
-                  break;
-                case 'warranty':
-                  build.warranty = value;
-                  break;
-                case 'tier':
-                case 'buildtier':
-                  build.buildTier = value;
-                  break;
-              }
-            });
-
-            if (build.modelName || build.price) {
-              builds.push(build);
-            }
-          }
+          const builds = parseSheetData(rows);
 
           if (builds.length === 0) {
             alert('No valid builds found in CSV');

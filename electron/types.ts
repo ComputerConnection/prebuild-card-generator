@@ -170,6 +170,14 @@ export interface AppAPI {
 }
 
 // ============================================================================
+// Menu IPC
+// ============================================================================
+
+export interface MenuAPI {
+  onAction: (callback: (channel: string, ...args: unknown[]) => void) => () => void;
+}
+
+// ============================================================================
 // Combined API exposed to renderer
 // ============================================================================
 
@@ -180,6 +188,7 @@ export interface ElectronAPI {
   email: EmailAPI;
   update: UpdateAPI;
   app: AppAPI;
+  menu: MenuAPI;
 }
 
 // Note: Window augmentation for the renderer is in src/vite-env.d.ts

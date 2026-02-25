@@ -34,20 +34,38 @@ function storeClear(s: AppStore): void {
   (s as any).clear();  // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
+// Allowlist of valid key prefixes for IPC store operations
+const ALLOWED_KEY_PREFIXES = [
+  'prebuild-config-store',
+  'prebuild-presets-store',
+  'prebuild-card-generator',
+  'prebuild-card-',
+  'prebuild-',
+];
+
+function isAllowedKey(key: string): boolean {
+  if (typeof key !== 'string' || key.length === 0 || key.length > 256) return false;
+  return ALLOWED_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
 export function registerStoreHandlers(): void {
   ipcMain.handle('store:get', (_event, key: string) => {
+    if (!isAllowedKey(key)) return null;
     return storeGet(store, key, null);
   });
 
   ipcMain.handle('store:set', (_event, key: string, value: unknown) => {
+    if (!isAllowedKey(key)) return;
     storeSet(store, key, value);
   });
 
   ipcMain.handle('store:delete', (_event, key: string) => {
+    if (!isAllowedKey(key)) return;
     storeDelete(store, key);
   });
 
   ipcMain.handle('store:has', (_event, key: string) => {
+    if (!isAllowedKey(key)) return false;
     return storeHas(store, key);
   });
 
@@ -64,8 +82,11 @@ export function registerStoreHandlers(): void {
   });
 
   ipcMain.handle('store:importData', (_event, data: Record<string, unknown>) => {
+    if (typeof data !== 'object' || data === null) return;
     for (const [key, value] of Object.entries(data)) {
-      storeSet(store, key, value);
+      if (isAllowedKey(key)) {
+        storeSet(store, key, value);
+      }
     }
   });
 }

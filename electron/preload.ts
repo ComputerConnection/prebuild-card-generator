@@ -69,6 +69,44 @@ const electronAPI: ElectronAPI = {
     isPackaged: () => ipcRenderer.invoke('app:isPackaged'),
     openExternal: (url: string) => ipcRenderer.invoke('app:openExternal', url),
   },
+
+  // ── Menu Events ──────────────────────────────────────────
+  menu: {
+    onAction: (callback) => {
+      const channels = [
+        'menu:newCard',
+        'menu:importPreset',
+        'menu:exportPreset',
+        'menu:exportPDF',
+        'menu:print',
+        'menu:undo',
+        'menu:redo',
+        'menu:cardSize',
+        'menu:printQueue',
+        'menu:sheetsImport',
+        'menu:checkUpdates',
+        'menu:about',
+      ];
+      const handlers: Array<{
+        channel: string;
+        handler: (_event: Electron.IpcRendererEvent, ...args: unknown[]) => void;
+      }> = [];
+
+      for (const channel of channels) {
+        const handler = (_event: Electron.IpcRendererEvent, ...args: unknown[]) =>
+          callback(channel, ...args);
+        ipcRenderer.on(channel, handler);
+        handlers.push({ channel, handler });
+      }
+
+      // Return unsubscribe function
+      return () => {
+        for (const { channel, handler } of handlers) {
+          ipcRenderer.removeListener(channel, handler);
+        }
+      };
+    },
+  },
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

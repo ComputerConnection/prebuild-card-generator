@@ -2,14 +2,23 @@
  * InventoryStatusForm - Condition, stock status, and quantity
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useId } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useConfigStore } from '../../stores';
 import { ConditionType, StockStatus, CONDITION_CONFIG, STOCK_STATUS_CONFIG } from '../../types';
 import { validateStockQuantity } from '../../utils/validation';
 
 export function InventoryStatusForm() {
-  const { config, setConfig } = useConfigStore();
+  const { condition, stockStatus, stockQuantity, setConfig } = useConfigStore(
+    useShallow((state) => ({
+      condition: state.config.condition,
+      stockStatus: state.config.stockStatus,
+      stockQuantity: state.config.stockQuantity,
+      setConfig: state.setConfig,
+    }))
+  );
   const [errors, setErrors] = useState<{ stockQuantity?: string }>({});
+  const baseId = useId();
 
   const handleQuantityChange = useCallback(
     (value: string) => {
@@ -21,18 +30,19 @@ export function InventoryStatusForm() {
   );
 
   const handleQuantityBlur = useCallback(() => {
-    const validation = validateStockQuantity(config.stockQuantity);
+    const validation = validateStockQuantity(stockQuantity);
     setErrors({ stockQuantity: validation.error });
-  }, [config.stockQuantity]);
+  }, [stockQuantity]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       <h2 className="text-lg font-semibold text-gray-800 mb-3">Inventory Status</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+          <label htmlFor={`${baseId}-condition`} className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
           <select
-            value={config.condition ?? ''}
+            id={`${baseId}-condition`}
+            value={condition ?? ''}
             onChange={(e) =>
               setConfig({ condition: e.target.value ? (e.target.value as ConditionType) : null })
             }
@@ -47,9 +57,10 @@ export function InventoryStatusForm() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
+          <label htmlFor={`${baseId}-stock-status`} className="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
           <select
-            value={config.stockStatus ?? ''}
+            id={`${baseId}-stock-status`}
+            value={stockStatus ?? ''}
             onChange={(e) =>
               setConfig({ stockStatus: e.target.value ? (e.target.value as StockStatus) : null })
             }
@@ -63,12 +74,13 @@ export function InventoryStatusForm() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor={`${baseId}-quantity`} className="block text-sm font-medium text-gray-700 mb-1">
             Quantity (optional)
           </label>
           <input
+            id={`${baseId}-quantity`}
             type="text"
-            value={config.stockQuantity}
+            value={stockQuantity}
             onChange={(e) => handleQuantityChange(e.target.value)}
             onBlur={handleQuantityBlur}
             placeholder="e.g., 5 units"
@@ -83,36 +95,36 @@ export function InventoryStatusForm() {
       </div>
 
       {/* Status badges preview */}
-      {(config.condition !== null || config.stockStatus !== null) && (
+      {(condition !== null || stockStatus !== null) && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {config.condition !== null && (
+          {condition !== null && (
             <span
               className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
               style={{
-                backgroundColor: CONDITION_CONFIG[config.condition].bgColor,
-                color: CONDITION_CONFIG[config.condition].color,
+                backgroundColor: CONDITION_CONFIG[condition].bgColor,
+                color: CONDITION_CONFIG[condition].color,
               }}
             >
-              {CONDITION_CONFIG[config.condition].label}
+              {CONDITION_CONFIG[condition].label}
             </span>
           )}
-          {config.stockStatus !== null && (
+          {stockStatus !== null && (
             <span
               className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
               style={{
-                backgroundColor: STOCK_STATUS_CONFIG[config.stockStatus].bgColor,
-                color: STOCK_STATUS_CONFIG[config.stockStatus].color,
+                backgroundColor: STOCK_STATUS_CONFIG[stockStatus].bgColor,
+                color: STOCK_STATUS_CONFIG[stockStatus].color,
               }}
             >
-              {STOCK_STATUS_CONFIG[config.stockStatus].label}
-              {config.stockQuantity && ` - ${config.stockQuantity}`}
+              {STOCK_STATUS_CONFIG[stockStatus].label}
+              {stockQuantity && ` - ${stockQuantity}`}
             </span>
           )}
         </div>
       )}
-      {config.condition !== null && (
+      {condition !== null && (
         <p className="mt-2 text-xs text-gray-500">
-          {CONDITION_CONFIG[config.condition].description}
+          {CONDITION_CONFIG[condition].description}
         </p>
       )}
     </div>

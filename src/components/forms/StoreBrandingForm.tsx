@@ -2,16 +2,26 @@
  * StoreBrandingForm - Store name, logo, and profile management
  */
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useId } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useConfigStore, useBrandIconsStore } from '../../stores';
 import type { StoreProfile } from '../../types';
 import { THEME_PRESETS } from '../../types';
 
 export function StoreBrandingForm() {
-  const { config, setConfig } = useConfigStore();
+  const { storeName, storeLogo, colorTheme, customColors, setConfig } = useConfigStore(
+    useShallow((state) => ({
+      storeName: state.config.storeName,
+      storeLogo: state.config.storeLogo,
+      colorTheme: state.config.colorTheme,
+      customColors: state.config.customColors,
+      setConfig: state.setConfig,
+    }))
+  );
   const { profiles, activeProfileId, addProfile, deleteProfile, setActiveProfile } =
     useBrandIconsStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const baseId = useId();
 
   // Local copy for backwards compatibility with localStorage-based profiles
   const [legacyProfiles, setLegacyProfiles] = useState<StoreProfile[]>([]);
@@ -32,11 +42,11 @@ export function StoreBrandingForm() {
   const allProfiles = [...legacyProfiles, ...profiles];
 
   const handleSaveStoreProfile = () => {
-    if (!config.storeName.trim()) {
+    if (!storeName.trim()) {
       alert('Please enter a store name first');
       return;
     }
-    const profile = addProfile(config.storeName, config.storeLogo, config.colorTheme);
+    const profile = addProfile(storeName, storeLogo, colorTheme);
     setActiveProfile(profile.id);
   };
 
@@ -49,7 +59,7 @@ export function StoreBrandingForm() {
         colorTheme: profile.defaultTheme,
         customColors:
           profile.defaultTheme === 'custom'
-            ? config.customColors
+            ? customColors
             : THEME_PRESETS[profile.defaultTheme],
       });
       setActiveProfile(profileId);
@@ -73,13 +83,27 @@ export function StoreBrandingForm() {
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setConfig({ storeLogo: event.target?.result as string });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate file size (5MB max) and type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload a PNG, JPEG, GIF, WebP, or SVG image.');
+      return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image too large. Maximum size is 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setConfig({ storeLogo: event.target?.result as string });
+    };
+    reader.onerror = () => {
+      console.error('Failed to read file');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleRemoveLogo = () => {
@@ -134,11 +158,12 @@ export function StoreBrandingForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
+          <label htmlFor={`${baseId}-store-name`} className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
           <div className="flex gap-2">
             <input
+              id={`${baseId}-store-name`}
               type="text"
-              value={config.storeName}
+              value={storeName}
               onChange={(e) => setConfig({ storeName: e.target.value })}
               placeholder="Your Store Name"
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -153,19 +178,20 @@ export function StoreBrandingForm() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Store Logo</label>
+          <label htmlFor={`${baseId}-store-logo`} className="block text-sm font-medium text-gray-700 mb-1">Store Logo</label>
           <div className="flex items-center gap-2">
             <input
+              id={`${baseId}-store-logo`}
               ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleLogoUpload}
               className="hidden"
             />
-            {config.storeLogo ? (
+            {storeLogo ? (
               <div className="flex items-center gap-2">
                 <img
-                  src={config.storeLogo}
+                  src={storeLogo}
                   alt="Store logo"
                   className="h-10 w-auto object-contain"
                 />

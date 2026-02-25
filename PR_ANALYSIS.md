@@ -100,7 +100,7 @@ smaller, reviewable PRs. Below are the specific improvement areas organized by c
 
 ---
 
-## 2. Architecture & Code Quality Issues (18 items)
+## 2. Architecture & Code Quality Issues (20 items)
 
 ### HIGH — Code Duplication
 
@@ -137,79 +137,97 @@ smaller, reviewable PRs. Below are the specific improvement areas organized by c
 - **Fix:** Split into `pdfRenderers/shelf.ts`, `pdfRenderers/price.ts`, `pdfRenderers/poster.ts`,
   `pdfHelpers.ts`, and `colorUtils.ts`.
 
+### HIGH — Dead Code & Architectural Drift
+
+#### 2.6 Dead Component — `CardPreviewUnified.tsx` Never Imported
+- **File:** `src/components/CardPreviewUnified.tsx` (120 lines)
+- **Issue:** This component is **never imported** anywhere. Only `CardPreview.tsx` is used in
+  `App.tsx`. This is dead code from an incomplete refactoring attempt.
+- **Fix:** Either complete the migration to use it, or delete it.
+
+#### 2.7 Dual Rendering Paths Create Drift
+- **Files:** `src/components/CardPreview.tsx` (hand-coded JSX) vs.
+  `src/components/CardPreviewUnified.tsx` + `src/utils/renderToHtml.tsx` +
+  `src/utils/layoutBuilders.ts` (unified layout system)
+- **Issue:** Two independent rendering approaches exist. The hand-coded JSX path is used in
+  production; the unified layout system was built but never integrated. Changes to one path
+  won't be reflected in the other, causing preview-to-PDF drift over time.
+- **Fix:** Complete the migration to the unified layout system so screen preview and PDF share
+  the same layout logic, or remove the unused path entirely.
+
 ### MEDIUM — Error Handling
 
-#### 2.6 Missing Async Error Handling in CardPreview
+#### 2.8 Missing Async Error Handling in CardPreview
 - **File:** `src/components/CardPreview.tsx:75-81`
 - **Issue:** `.then(setQrCodeImage)` with no `.catch()`. Silent failure leaves component in
   inconsistent state.
 - **Fix:** Add `.catch()` to reset the image state and log the error.
 
-#### 2.7 Silent Import Failures in Presets Store
+#### 2.9 Silent Import Failures in Presets Store
 - **File:** `src/stores/presetsStore.ts:132-150`
 - **Issue:** `JSON.parse()` catch returns `0` with no user feedback about why import failed.
 - **Fix:** Log the error and surface a user-visible message.
 
-#### 2.8 Inconsistent Async Patterns in pdfGenerator
+#### 2.10 Inconsistent Async Patterns in pdfGenerator
 - **File:** `src/utils/pdfGenerator.ts` (multiple locations)
 - **Issue:** Mixes `.then()` chains and `async/await` with inconsistent error handling patterns.
 - **Fix:** Standardize on `async/await` with consistent `try/catch`.
 
 ### MEDIUM — Type Safety
 
-#### 2.9 JSON.stringify for Deep Equality
+#### 2.11 JSON.stringify for Deep Equality
 - **File:** `src/hooks/useHistory.ts:34`
 - **Issue:** `JSON.stringify(resolvedState) === JSON.stringify(prev.present)` is O(n), fragile
   (key ordering), and fails on circular references.
 - **Fix:** Use a proper deep-equality library (e.g., `fast-deep-equal`).
 
-#### 2.10 Unsafe Type Assertion on Persisted State
+#### 2.12 Unsafe Type Assertion on Persisted State
 - **File:** `src/stores/brandIconsStore.ts:137`
 - **Issue:** `persistedState as BrandIconsState` without any runtime validation. If schema
   changes, this causes runtime crashes.
 - **Fix:** Add runtime shape validation before casting.
 
-#### 2.11 Void Parameter Hack
+#### 2.13 Void Parameter Hack
 - **File:** `src/stores/configStore.ts:77`
 - **Issue:** `void _newConfig;` to suppress linter. Parameter is declared but unused.
 - **Fix:** Remove the parameter or document its purpose.
 
 ### MEDIUM — Architecture
 
-#### 2.12 Duplicate History/Undo Systems
+#### 2.14 Duplicate History/Undo Systems
 - **Files:** `src/hooks/useHistory.ts` and `src/stores/configStore.ts`
 - **Issue:** Two independent undo/redo implementations — a generic hook and a custom store.
 - **Fix:** Consolidate into one system, e.g., `zustand` temporal middleware.
 
-#### 2.13 Global Mutable Counter for Element IDs
+#### 2.15 Global Mutable Counter for Element IDs
 - **File:** `src/utils/layoutSchema.ts:337-340`
 - **Issue:** Module-level `elementIdCounter` with manual reset. Fragile in concurrent scenarios.
 - **Fix:** Use a factory/class pattern or pass context.
 
-#### 2.14 Dead Code — Unused `ContainerElement` Type
+#### 2.16 Dead Code — Unused `ContainerElement` Type
 - **File:** `src/utils/layoutSchema.ts:252-261`
 - **Issue:** Type is defined and exported but never referenced anywhere.
 - **Fix:** Remove it.
 
 ### LOW
 
-#### 2.15 Missing Input Validation in Layout Builders
+#### 2.17 Missing Input Validation in Layout Builders
 - **File:** `src/utils/layoutBuilders.ts:87-105`
 - **Issue:** `buildSpecItems` doesn't validate that component values are non-empty strings.
 - **Fix:** Add guard: `if (!value?.trim()) continue;`
 
-#### 2.16 Potential Image Memory Leak
+#### 2.18 Potential Image Memory Leak
 - **File:** `src/utils/pdfGenerator.ts:104-129`
 - **Issue:** `Image` elements created in `addImageToPdf` are never cleaned up.
 - **Fix:** Set `img.src = ''` after use, or implement an image cache with eviction.
 
-#### 2.17 Weak Hex Color Validation
+#### 2.19 Weak Hex Color Validation
 - **File:** `src/utils/layoutSchema.ts:348-352`
 - **Issue:** `hexToRgb` doesn't handle short hex (`#FFF`), mixed case, or invalid input
   gracefully.
 - **Fix:** Normalize input and support 3-char hex.
 
-#### 2.18 Missing Layout Documentation
+#### 2.20 Missing Layout Documentation
 - **File:** `src/utils/layoutSchema.ts`
 - **Issue:** Complex element type system with no documentation on usage patterns or rendering
   order.
@@ -424,9 +442,9 @@ smaller, reviewable PRs. Below are the specific improvement areas organized by c
 |----------|----------|-------|--------|
 | **P0** | Security | Plaintext credential fallback, HTTPS, path traversal | 1-2 days |
 | **P1** | Security | CSP headers, SMTP validation, temp file hardening | 1-2 days |
-| **P1** | Architecture | Split pdfGenerator.ts, extract CardPreview layouts | 2-3 days |
+| **P1** | Architecture | Split pdfGenerator.ts, extract CardPreview layouts, resolve dual rendering paths | 2-3 days |
 | **P1** | Testing | Fix PDF generator tests to verify actual output | 1 day |
-| **P2** | Code Quality | Deduplicate color/badge/spec utilities | 1 day |
+| **P2** | Code Quality | Deduplicate color/badge/spec utilities, remove dead code | 1 day |
 | **P2** | Build | Fix redundant CI builds, add Node matrix | 0.5 day |
 | **P2** | Performance | Debounce previews, fix re-render issues | 1 day |
 | **P3** | Testing | Add edge case tests (FileReader, quota, overflow) | 1-2 days |

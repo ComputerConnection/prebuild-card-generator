@@ -90,7 +90,7 @@ function buildSpecItems(ctx: LayoutBuilderContext, specKeys: ComponentCategory[]
 
   for (const key of specKeys) {
     const value = config.components[key];
-    if (!value) continue;
+    if (!value || typeof value !== 'string' || value.trim().length === 0) continue;
 
     const brandIcon = findBrandIcon(value, brandIcons);
     items.push({

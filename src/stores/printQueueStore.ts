@@ -59,13 +59,23 @@ export const usePrintQueueStore = create<PrintQueueState>((set, get) => ({
       if (state.queue.some((p) => p.id === preset.id)) {
         return state;
       }
-      return { queue: [...state.queue, preset] };
+      // Sanitize name at insertion time for fail-fast behavior (strip dangerous chars, keep spaces)
+      const sanitized = {
+        ...preset,
+        name: preset.name.replace(/[^a-zA-Z0-9-_\s]/g, '').trim() || 'preset',
+      };
+      return { queue: [...state.queue, sanitized] };
     });
   },
 
   addMultipleToQueue: (presets) => {
     set((state) => {
-      const newPresets = presets.filter((p) => !state.queue.some((q) => q.id === p.id));
+      const newPresets = presets
+        .filter((p) => !state.queue.some((q) => q.id === p.id))
+        .map((p) => ({
+          ...p,
+          name: p.name.replace(/[^a-zA-Z0-9-_\s]/g, '').trim() || 'preset',
+        }));
       return { queue: [...state.queue, ...newPresets] };
     });
   },
@@ -108,28 +118,41 @@ export const usePrintQueueStore = create<PrintQueueState>((set, get) => ({
       // Lazy load PDF module
       const { generatePDF, downloadPDF } = await loadPDFModule();
 
-      // Generate individual PDFs with a delay between downloads
-      for (let i = 0; i < queue.length; i++) {
+      // Process PDFs in batches of 3 to balance speed and browser stability
+      const BATCH_SIZE = 3;
+      const sizeName = CARD_SIZES[cardSize].name.replace(/\s+/g, '-');
+
+      for (let i = 0; i < queue.length; i += BATCH_SIZE) {
         if (processingCancelled) throw new Error('Cancelled');
 
-        const preset = queue[i];
+        const batch = queue.slice(i, i + BATCH_SIZE);
+
+        // Generate batch in parallel
+        const results = await Promise.all(
+          batch.map(async (preset) => {
+            if (!preset.config) throw new Error(`Invalid config for preset: ${preset.name}`);
+            const doc = await generatePDF(preset.config, cardSize, brandIcons);
+            return { doc, name: preset.name };
+          })
+        );
+
+        // Download sequentially to avoid browser blocking
+        for (const { doc, name } of results) {
+          if (processingCancelled) throw new Error('Cancelled');
+          downloadPDF(doc, `${name}-${sizeName}.pdf`);
+        }
+
         set({
           progress: {
-            current: i + 1,
+            current: Math.min(i + BATCH_SIZE, queue.length),
             total: queue.length,
-            currentPresetName: preset.name,
+            currentPresetName: batch[batch.length - 1].name,
           },
         });
 
-        const doc = await generatePDF(preset.config, cardSize, brandIcons);
-        const safeName = preset.name.replace(/[^a-zA-Z0-9-_\s]/g, '').replace(/\s+/g, '-');
-        const sizeName = CARD_SIZES[cardSize].name.replace(/\s+/g, '-');
-        const filename = `${safeName}-${sizeName}.pdf`;
-        downloadPDF(doc, filename);
-
-        // Delay between downloads to prevent browser blocking
-        if (i < queue.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
+        // Brief delay between batches
+        if (i + BATCH_SIZE < queue.length) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
         }
       }
 

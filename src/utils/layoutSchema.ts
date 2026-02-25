@@ -321,15 +321,30 @@ export interface LayoutBuilderContext {
 // HELPER FUNCTIONS
 // ============================================================================
 
+/** Element ID generator factory */
+export class ElementIdGenerator {
+  private counter = 0;
+
+  generate(prefix: string): string {
+    return `${prefix}-${++this.counter}`;
+  }
+
+  reset(): void {
+    this.counter = 0;
+  }
+}
+
+/** Default generator instance */
+const defaultGenerator = new ElementIdGenerator();
+
 /** Generate a unique element ID */
-let elementIdCounter = 0;
 export function generateElementId(prefix: string): string {
-  return `${prefix}-${++elementIdCounter}`;
+  return defaultGenerator.generate(prefix);
 }
 
 /** Reset ID counter (useful for testing) */
 export function resetElementIdCounter(): void {
-  elementIdCounter = 0;
+  defaultGenerator.reset();
 }
 
 /** Convert hex color to RGB tuple */

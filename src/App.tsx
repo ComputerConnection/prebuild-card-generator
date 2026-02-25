@@ -44,7 +44,9 @@ function App() {
       setCardSize: state.setCardSize,
     }))
   );
-  const brandIcons = useBrandIconsStore((state) => state.icons);
+  const { brandIcons } = useBrandIconsStore(
+    useShallow((state) => ({ brandIcons: state.icons }))
+  );
   const addMultipleToQueue = usePrintQueueStore((state) => state.addMultipleToQueue);
 
   // Keyboard shortcuts

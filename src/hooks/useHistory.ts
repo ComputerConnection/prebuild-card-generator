@@ -18,6 +18,19 @@ interface UseHistoryReturn<T> {
 
 const MAX_HISTORY = 50;
 
+/** Shallow equality check for objects, reference equality for primitives */
+function shallowEqual<T>(a: T, b: T): boolean {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  for (const key of keysA) {
+    if ((a as Record<string, unknown>)[key] !== (b as Record<string, unknown>)[key]) return false;
+  }
+  return true;
+}
+
 export function useHistory<T>(initialState: T): UseHistoryReturn<T> {
   const [history, setHistory] = useState<HistoryState<T>>({
     past: [],
@@ -31,7 +44,7 @@ export function useHistory<T>(initialState: T): UseHistoryReturn<T> {
         typeof newState === 'function' ? (newState as (prev: T) => T)(prev.present) : newState;
 
       // Don't add to history if state hasn't changed
-      if (JSON.stringify(resolvedState) === JSON.stringify(prev.present)) {
+      if (shallowEqual(resolvedState, prev.present)) {
         return prev;
       }
 

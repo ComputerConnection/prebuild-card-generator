@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GoogleSheetsImport } from '../../../components/GoogleSheetsImport';
 import * as googleSheetsUtils from '../../../utils/googleSheets';
@@ -163,8 +163,10 @@ describe('GoogleSheetsImport', () => {
 
       expect(screen.getByText('Importing...')).toBeInTheDocument();
 
-      // Resolve the promise
-      resolveImport!({ success: true, builds: [] });
+      // Resolve the promise and flush resulting state updates
+      await act(async () => {
+        resolveImport!({ success: true, builds: [] });
+      });
     });
 
     it('should show success message after import', async () => {
@@ -247,11 +249,11 @@ describe('GoogleSheetsImport', () => {
       });
 
       // Advance timer past the auto-close delay (1500ms in component + buffer)
-      await vi.advanceTimersByTimeAsync(2000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('Google Sheets Sync')).not.toBeInTheDocument();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000);
       });
+
+      expect(screen.queryByText('Google Sheets Sync')).not.toBeInTheDocument();
     }, 10000);
   });
 

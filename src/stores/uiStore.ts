@@ -138,3 +138,16 @@ export const useUIStore = create<UIState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select the current card size */
+export const selectCardSize = (state: UIState) => state.cardSize;
+
+/** Select panel collapse states */
+export const selectPanels = (state: UIState) => state.panels;
+
+/** Select loading states */
+export const selectLoading = (state: UIState) => state.loading;

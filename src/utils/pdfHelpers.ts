@@ -15,12 +15,12 @@ import { findBrandIcon } from './brandDetection';
 import { generateQRCodeDataUrl } from './qrcode';
 import { generateBarcodeDataUrl, isValidBarcode } from './barcode';
 import { logger } from './logger';
+import { hexToRgb, lightenColor, type RGB } from './colorUtils';
+export type { RGB } from './colorUtils';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
-
-export type RGB = [number, number, number];
 
 export interface Badge {
   text: string;
@@ -49,34 +49,8 @@ export interface HeaderBarOptions {
   accentHeight?: number;
 }
 
-// ============================================================================
-// COLOR UTILITY FUNCTIONS
-// ============================================================================
-
-export function hexToRgb(hex: string): RGB {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
-    : [0, 0, 0];
-}
-
-export function lightenColor(hex: string, percent: number): RGB {
-  const [r, g, b] = hexToRgb(hex);
-  return [
-    Math.round(r + (255 - r) * percent),
-    Math.round(g + (255 - g) * percent),
-    Math.round(b + (255 - b) * percent),
-  ];
-}
-
-export function darkenColor(hex: string, percent: number): RGB {
-  const [r, g, b] = hexToRgb(hex);
-  return [
-    Math.round(r * (1 - percent)),
-    Math.round(g * (1 - percent)),
-    Math.round(b * (1 - percent)),
-  ];
-}
+// Re-export color utilities for consumers that import from pdfHelpers
+export { hexToRgb, lightenColor, darkenColor } from './colorUtils';
 
 // ============================================================================
 // IMAGE HELPERS

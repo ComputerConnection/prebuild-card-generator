@@ -210,3 +210,22 @@ export const useConfigStore = create<ConfigState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select the current config */
+export const selectConfig = (state: ConfigState) => state.config;
+
+/** Select whether undo is available */
+export const selectCanUndo = (state: ConfigState) => state.canUndo;
+
+/** Select whether redo is available */
+export const selectCanRedo = (state: ConfigState) => state.canRedo;
+
+/** Select the current price */
+export const selectPrice = (state: ConfigState) => state.config.price;
+
+/** Select components */
+export const selectComponents = (state: ConfigState) => state.config.components;

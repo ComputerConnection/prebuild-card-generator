@@ -214,3 +214,16 @@ export const useBrandIconsStore = create<BrandIconsState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select all brand icons */
+export const selectIcons = (state: BrandIconsState) => state.icons;
+
+/** Select all store profiles */
+export const selectProfiles = (state: BrandIconsState) => state.profiles;
+
+/** Select the active profile ID */
+export const selectActiveProfileId = (state: BrandIconsState) => state.activeProfileId;

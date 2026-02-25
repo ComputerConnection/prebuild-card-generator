@@ -7,16 +7,11 @@
  */
 
 import type { PrebuildConfig, CardSize, BrandIcon, ThemeColors, ComponentCategory } from '../types';
+import { lightenColorHex, darkenColorHex, type HexColor } from './colorUtils';
 
-// ============================================================================
-// PRIMITIVE TYPES
-// ============================================================================
-
-/** RGB color tuple */
-export type RGB = [number, number, number];
-
-/** Hex color string */
-export type HexColor = string;
+// Re-export color types and utilities from the canonical source
+export type { RGB, HexColor } from './colorUtils';
+export { hexToRgb } from './colorUtils';
 
 /** Position within the card (relative units 0-1 or absolute) */
 export interface Position {
@@ -347,28 +342,12 @@ export function resetElementIdCounter(): void {
   defaultGenerator.reset();
 }
 
-/** Convert hex color to RGB tuple */
-export function hexToRgb(hex: string): RGB {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
-    : [0, 0, 0];
+/** Lighten a hex color by a percentage, returns hex string */
+export function lightenColor(hex: string, percent: number): string {
+  return lightenColorHex(hex, percent);
 }
 
-/** Lighten a hex color by a percentage */
-export function lightenColor(hex: string, percent: number): HexColor {
-  const [r, g, b] = hexToRgb(hex);
-  const newR = Math.round(r + (255 - r) * percent);
-  const newG = Math.round(g + (255 - g) * percent);
-  const newB = Math.round(b + (255 - b) * percent);
-  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-}
-
-/** Darken a hex color by a percentage */
-export function darkenColor(hex: string, percent: number): HexColor {
-  const [r, g, b] = hexToRgb(hex);
-  const newR = Math.round(r * (1 - percent));
-  const newG = Math.round(g * (1 - percent));
-  const newB = Math.round(b * (1 - percent));
-  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+/** Darken a hex color by a percentage, returns hex string */
+export function darkenColor(hex: string, percent: number): string {
+  return darkenColorHex(hex, percent);
 }

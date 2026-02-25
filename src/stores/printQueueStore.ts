@@ -180,3 +180,19 @@ export const usePrintQueueStore = create<PrintQueueState>((set, get) => ({
     set({ error: null });
   },
 }));
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select the print queue */
+export const selectQueue = (state: PrintQueueState) => state.queue;
+
+/** Select queue count */
+export const selectQueueCount = (state: PrintQueueState) => state.queue.length;
+
+/** Select whether processing is active */
+export const selectIsProcessing = (state: PrintQueueState) => state.isProcessing;
+
+/** Select current progress */
+export const selectProgress = (state: PrintQueueState) => state.progress;

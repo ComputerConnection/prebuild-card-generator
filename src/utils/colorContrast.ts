@@ -7,19 +7,9 @@
  * - Enhanced (AAA): 7:1 for normal text, 4.5:1 for large text
  */
 
-/**
- * Parse a hex color string to RGB values
- */
-export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
-}
+import { hexToRgbObject as hexToRgb } from './colorUtils';
+
+export { hexToRgbObject as hexToRgb } from './colorUtils';
 
 /**
  * Convert RGB to relative luminance per WCAG 2.1

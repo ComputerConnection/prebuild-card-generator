@@ -195,3 +195,16 @@ export const usePresetsStore = create<PresetsState>()(
     }
   )
 );
+
+// ============================================================================
+// STANDALONE SELECTORS
+// ============================================================================
+
+/** Select all presets */
+export const selectPresets = (state: PresetsState) => state.presets;
+
+/** Select all folders */
+export const selectFolders = (state: PresetsState) => state.folders;
+
+/** Select preset count */
+export const selectPresetCount = (state: PresetsState) => state.presets.length;

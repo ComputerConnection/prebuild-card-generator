@@ -3,6 +3,8 @@ node_modules/
 
 # Build output
 dist/
+dist-electron/
+release/
 
 # Environment
 .env
@@ -26,3 +28,7 @@ npm-debug.log*
 # Local config
 *.local
 coverage/
+
+# Electron
+out/
+*.blockmap

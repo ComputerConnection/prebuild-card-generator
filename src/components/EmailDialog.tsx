@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { jsPDF } from 'jspdf';
 import {
   loadEmailConfig,
@@ -25,13 +25,15 @@ interface EmailDialogProps {
 type SendMethod = 'emailjs' | 'mailto' | 'share';
 
 export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: EmailDialogProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const baseId = useId();
   const [toEmail, setToEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sendMethod, setSendMethod] = useState<SendMethod>('mailto');
   const [emailHistory, setEmailHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [loading, setSending] = useState(false);
+  const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // EmailJS config
@@ -172,15 +174,54 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
     setShowHistory(false);
   };
 
+  // Focus the first focusable element when the modal opens
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }
+  }, [isOpen]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div ref={modalRef} onKeyDown={handleKeyDown} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="email-dialog-title">
       <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800">Email Spec Card</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <h3 id="email-dialog-title" className="text-lg font-semibold text-gray-800">Email Spec Card</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -255,27 +296,39 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
                     </a>{' '}
                     account (free tier: 200 emails/month)
                   </p>
-                  <input
-                    type="text"
-                    value={serviceId}
-                    onChange={(e) => setServiceId(e.target.value)}
-                    placeholder="Service ID"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
-                  />
-                  <input
-                    type="text"
-                    value={templateId}
-                    onChange={(e) => setTemplateId(e.target.value)}
-                    placeholder="Template ID"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
-                  />
-                  <input
-                    type="text"
-                    value={publicKey}
-                    onChange={(e) => setPublicKey(e.target.value)}
-                    placeholder="Public Key"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
-                  />
+                  <div>
+                    <label htmlFor={`${baseId}-service-id`} className="sr-only">Service ID</label>
+                    <input
+                      id={`${baseId}-service-id`}
+                      type="text"
+                      value={serviceId}
+                      onChange={(e) => setServiceId(e.target.value)}
+                      placeholder="Service ID"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`${baseId}-template-id`} className="sr-only">Template ID</label>
+                    <input
+                      id={`${baseId}-template-id`}
+                      type="text"
+                      value={templateId}
+                      onChange={(e) => setTemplateId(e.target.value)}
+                      placeholder="Template ID"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`${baseId}-public-key`} className="sr-only">Public Key</label>
+                    <input
+                      id={`${baseId}-public-key`}
+                      type="text"
+                      value={publicKey}
+                      onChange={(e) => setPublicKey(e.target.value)}
+                      placeholder="Public Key"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
+                    />
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={handleSaveConfig}
@@ -325,8 +378,9 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
 
           {/* To Email */}
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
+            <label htmlFor={`${baseId}-to`} className="block text-sm font-medium text-gray-700 mb-1">To</label>
             <input
+              id={`${baseId}-to`}
               type="email"
               value={toEmail}
               onChange={(e) => setToEmail(e.target.value)}
@@ -354,8 +408,9 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
 
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+            <label htmlFor={`${baseId}-subject`} className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
             <input
+              id={`${baseId}-subject`}
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
@@ -365,8 +420,9 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
 
           {/* Message */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+            <label htmlFor={`${baseId}-message`} className="block text-sm font-medium text-gray-700 mb-1">Message</label>
             <textarea
+              id={`${baseId}-message`}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
@@ -419,10 +475,10 @@ export function EmailDialog({ isOpen, onClose, config, pdfDoc, cardSize }: Email
           </button>
           <button
             onClick={handleSend}
-            disabled={loading || !toEmail}
+            disabled={sending || !toEmail}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
-            {loading ? (
+            {sending ? (
               <>
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle

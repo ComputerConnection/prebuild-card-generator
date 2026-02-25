@@ -2,7 +2,7 @@
  * Error Boundary - Catches JavaScript errors in child components
  */
 
-import { Component, ReactNode } from 'react';
+import { Component, ReactNode, useState } from 'react';
 import { ErrorFallback, ErrorFallbackCompact } from './ErrorFallback';
 
 interface ErrorBoundaryProps {
@@ -94,8 +94,9 @@ export function withErrorBoundary<P extends object>(
   };
 }
 
-// Hook-style error boundary for functional components (using key to reset)
+// Hook-style error boundary reset — call resetError() to force re-mount children
 export function useErrorBoundaryReset() {
-  const resetKey = Date.now();
-  return { resetKey };
+  const [resetKey, setResetKey] = useState(0);
+  const resetError = () => setResetKey((k) => k + 1);
+  return { resetKey, resetError };
 }

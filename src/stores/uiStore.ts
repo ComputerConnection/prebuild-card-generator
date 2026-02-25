@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CardSize } from '../types';
 import { env } from '../config/env';
+import { zustandStorage } from '../lib/storage/zustandStorage';
 
 interface CollapsiblePanels {
   storeBranding: boolean;
@@ -129,6 +130,7 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: 'prebuild-ui-store',
+      storage: zustandStorage,
       partialize: (state) => ({
         cardSize: state.cardSize,
         panels: state.panels,

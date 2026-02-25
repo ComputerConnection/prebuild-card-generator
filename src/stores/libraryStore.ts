@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ComponentCategory } from '../types';
 import { componentOptions } from '../data/componentOptions';
+import { zustandStorage } from '../lib/storage/zustandStorage';
 
 export interface LibraryComponent {
   id: string;
@@ -196,6 +197,7 @@ export const useLibraryStore = create<LibraryState>()(
     }),
     {
       name: 'prebuild-library-store',
+      storage: zustandStorage,
       migrate: (persistedState, version) => {
         if (version === 0) {
           // Check for legacy data

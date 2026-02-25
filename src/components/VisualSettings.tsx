@@ -99,6 +99,8 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between text-left"
+        aria-expanded={isExpanded}
+        aria-controls="visual-settings-content"
       >
         <h2 className="text-lg font-semibold text-gray-800">Visual Settings</h2>
         <svg
@@ -112,7 +114,7 @@ export function VisualSettingsComponent({ settings, sku, onChange }: VisualSetti
       </button>
 
       {isExpanded && (
-        <div className="mt-4 space-y-4">
+        <div id="visual-settings-content" className="mt-4 space-y-4">
           {/* Card Template */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Card Template</label>

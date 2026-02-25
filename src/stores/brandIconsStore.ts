@@ -9,6 +9,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BrandIcon, StoreProfile, ColorTheme } from '../types';
+import { zustandStorage } from '../lib/storage/zustandStorage';
 
 // Legacy localStorage keys to migrate from
 const LEGACY_KEYS = {
@@ -131,6 +132,7 @@ export const useBrandIconsStore = create<BrandIconsState>()(
     }),
     {
       name: 'prebuild-brand-icons-store',
+      storage: zustandStorage,
       migrate: (persistedState, version) => {
         const state = persistedState as BrandIconsState;
 

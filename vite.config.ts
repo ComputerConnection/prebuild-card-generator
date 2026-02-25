@@ -1,17 +1,64 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import electron from 'vite-plugin-electron';
+import renderer from 'vite-plugin-electron-renderer';
 import path from 'path';
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, process.cwd(), '');
   const enablePwa = env.VITE_ENABLE_PWA !== 'false';
+  const isElectron = mode === 'electron' || !!process.env.ELECTRON;
 
   return {
     plugins: [
       react(),
-      enablePwa &&
+      // Electron plugins — only active when building for desktop
+      isElectron &&
+        electron([
+          {
+            // Main process entry point
+            entry: 'electron/main.ts',
+            onstart(args) {
+              args.startup();
+            },
+            vite: {
+              build: {
+                outDir: 'dist-electron',
+                sourcemap: true,
+                rollupOptions: {
+                  external: [
+                    'electron',
+                    'electron-store',
+                    'electron-updater',
+                    'nodemailer',
+                  ],
+                },
+              },
+            },
+          },
+          {
+            // Preload script
+            entry: 'electron/preload.ts',
+            onstart(args) {
+              args.reload();
+            },
+            vite: {
+              build: {
+                outDir: 'dist-electron',
+                sourcemap: true,
+                rollupOptions: {
+                  external: ['electron'],
+                },
+              },
+            },
+          },
+        ]),
+      isElectron && renderer(),
+      // PWA — only for web builds, not Electron
+      !isElectron &&
+        enablePwa &&
         VitePWA({
           registerType: 'autoUpdate',
           includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
@@ -96,7 +143,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
-      open: true,
+      open: !isElectron, // Don't auto-open browser when running in Electron
     },
     build: {
       sourcemap: true,

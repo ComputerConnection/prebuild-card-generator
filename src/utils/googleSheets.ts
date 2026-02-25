@@ -22,8 +22,8 @@ export function buildSheetCsvUrl(sheetId: string, gid: string = '0'): string {
   return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 }
 
-// Parse CSV text into rows
-function parseCSV(text: string): string[][] {
+// Parse CSV text into rows (handles quoted fields, commas inside quotes, etc.)
+export function parseCSV(text: string): string[][] {
   const rows: string[][] = [];
   let currentRow: string[] = [];
   let currentCell = '';

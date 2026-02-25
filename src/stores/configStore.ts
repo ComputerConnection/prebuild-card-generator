@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { zustandStorage } from '../lib/storage/zustandStorage';
 import type {
   PrebuildConfig,
   ComponentCategory,
@@ -116,11 +117,12 @@ export const useConfigStore = create<ConfigState>()(
           state.canRedo = false;
         }),
 
-      // Load config from preset (with history)
+      // Load config from preset (with history) — deep-clone to avoid shared references
       loadConfig: (config) =>
         set((state) => {
-          const newHistory = pushToHistory(state, config);
-          state.config = config;
+          const cloned = structuredClone(config);
+          const newHistory = pushToHistory(state, cloned);
+          state.config = cloned;
           state.history = newHistory;
           state.canUndo = newHistory.past.length > 0;
           state.canRedo = false;
@@ -202,6 +204,7 @@ export const useConfigStore = create<ConfigState>()(
     })),
     {
       name: 'prebuild-config-store',
+      storage: zustandStorage,
       partialize: (state) => ({
         config: state.config,
         // Don't persist history to keep storage small

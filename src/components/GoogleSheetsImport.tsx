@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { importFromGoogleSheet, downloadCSV } from '../utils/googleSheets';
+import { useState, useRef, useEffect, useCallback, useId } from 'react';
+import { importFromGoogleSheet, extractSheetId, downloadCSV } from '../utils/googleSheets';
 import { PrebuildConfig } from '../types';
 
 interface GoogleSheetsImportProps {
@@ -8,6 +8,8 @@ interface GoogleSheetsImportProps {
 }
 
 export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImportProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const baseId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [sheetUrl, setSheetUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,6 +19,12 @@ export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImpo
   const handleImport = async () => {
     if (!sheetUrl.trim()) {
       setError('Please enter a Google Sheet URL');
+      return;
+    }
+
+    // Validate URL format before making a network request
+    if (!extractSheetId(sheetUrl)) {
+      setError('Invalid Google Sheets URL. Please enter a valid Google Sheets link or sheet ID.');
       return;
     }
 
@@ -47,6 +55,47 @@ export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImpo
     }
   };
 
+  const closeModal = useCallback(() => setIsOpen(false), []);
+
+  // Focus the first focusable element when the modal opens
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }
+  }, [isOpen]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, [closeModal]);
+
   return (
     <>
       <button
@@ -61,14 +110,15 @@ export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImpo
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div ref={modalRef} onKeyDown={handleKeyDown} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="sheets-dialog-title">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-800">Google Sheets Sync</h3>
+                <h3 id="sheets-dialog-title" className="text-lg font-semibold text-gray-800">Google Sheets Sync</h3>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600"
+                  aria-label="Close"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -91,7 +141,9 @@ export function GoogleSheetsImport({ onImport, currentBuilds }: GoogleSheetsImpo
                   with the link can view&quot;.
                 </p>
 
+                <label htmlFor={`${baseId}-sheet-url`} className="sr-only">Google Sheet URL</label>
                 <input
+                  id={`${baseId}-sheet-url`}
                   type="text"
                   value={sheetUrl}
                   onChange={(e) => setSheetUrl(e.target.value)}

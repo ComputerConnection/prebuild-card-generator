@@ -13,7 +13,7 @@ export function LoadingOverlay({ isLoading, progress, status, onCancel }: Loadin
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="Loading">
       <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
         <div className="text-center">
           {/* Spinner */}
@@ -41,7 +41,7 @@ export function LoadingOverlay({ isLoading, progress, status, onCancel }: Loadin
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Operation progress">
             <div
               className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
               style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
@@ -52,7 +52,7 @@ export function LoadingOverlay({ isLoading, progress, status, onCancel }: Loadin
           <p className="text-sm text-gray-600 mb-2">{Math.round(progress)}% complete</p>
 
           {/* Status message */}
-          {status && <p className="text-sm font-medium text-gray-800 mb-4">{status}</p>}
+          {status && <p role="status" aria-live="polite" className="text-sm font-medium text-gray-800 mb-4">{status}</p>}
 
           {/* Cancel button */}
           {onCancel && (

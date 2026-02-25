@@ -1,0 +1,101 @@
+appId: com.computerconnection.prebuild-card-generator
+productName: PC Prebuild Spec Card Generator
+copyright: Copyright © 2024-2026
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - resources/**/*
+  - "!**/*.map"
+
+# ── Windows ─────────────────────────────────────────────────
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  icon: resources/icon.ico
+  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Prebuild Card Generator
+  uninstallDisplayName: PC Prebuild Spec Card Generator
+  license: null
+
+portable:
+  artifactName: "${productName}-Portable-${version}.${ext}"
+
+# ── macOS ───────────────────────────────────────────────────
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  icon: resources/icon.icns
+  category: public.app-category.business
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: null
+  entitlementsInherit: null
+
+dmg:
+  title: "${productName}"
+  artifactName: "${productName}-${version}-${arch}.dmg"
+
+# ── Linux ───────────────────────────────────────────────────
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+    - target: rpm
+      arch:
+        - x64
+  icon: resources/icon.png
+  category: Office
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+  synopsis: Generate print-ready PDF spec cards for prebuilt computers
+  description: >
+    A desktop application for creating professional specification cards
+    for prebuilt computer systems. Generate, print, and export PDF cards
+    with full hardware specs, pricing, QR codes, and branding.
+
+deb:
+  depends:
+    - gconf2
+    - gconf-service
+    - libnotify4
+    - libappindicator1
+    - libxtst6
+    - libnss3
+
+# ── Auto Update ─────────────────────────────────────────────
+publish:
+  provider: github
+  owner: ComputerConnection
+  repo: prebuild-card-generator
+  releaseType: release
+
+# ── Extra metadata ──────────────────────────────────────────
+extraMetadata:
+  main: dist-electron/main.js

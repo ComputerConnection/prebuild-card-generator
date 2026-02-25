@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Preset, PrebuildConfig, PresetFolder, DEFAULT_FOLDERS, formatPrice } from '../types';
 
 interface PresetManagerProps {
@@ -114,7 +114,7 @@ export function PresetManager({ currentConfig, onLoadPreset, onPrintQueue }: Pre
   };
 
   // Filter presets by search and folder
-  const filteredPresets = presets.filter((preset) => {
+  const filteredPresets = useMemo(() => presets.filter((preset) => {
     const matchesSearch =
       !searchQuery ||
       preset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,22 +125,22 @@ export function PresetManager({ currentConfig, onLoadPreset, onPrintQueue }: Pre
     const matchesFolder = activeFolder === null || preset.folder === activeFolder;
 
     return matchesSearch && matchesFolder;
-  });
+  }), [presets, searchQuery, activeFolder]);
 
   // Group presets by folder
-  const presetsByFolder: Record<string, Preset[]> = {};
-  const unfolderedPresets: Preset[] = [];
-
-  filteredPresets.forEach((preset) => {
-    if (preset.folder) {
-      if (!presetsByFolder[preset.folder]) {
-        presetsByFolder[preset.folder] = [];
+  const { presetsByFolder, unfolderedPresets } = useMemo(() => {
+    const byFolder: Record<string, Preset[]> = {};
+    const unfoldered: Preset[] = [];
+    filteredPresets.forEach((preset) => {
+      if (preset.folder) {
+        if (!byFolder[preset.folder]) byFolder[preset.folder] = [];
+        byFolder[preset.folder].push(preset);
+      } else {
+        unfoldered.push(preset);
       }
-      presetsByFolder[preset.folder].push(preset);
-    } else {
-      unfolderedPresets.push(preset);
-    }
-  });
+    });
+    return { presetsByFolder: byFolder, unfolderedPresets: unfoldered };
+  }, [filteredPresets]);
 
   const renderPresetItem = (preset: Preset) => (
     <div

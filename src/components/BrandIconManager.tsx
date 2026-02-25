@@ -35,6 +35,17 @@ export const BrandIconManager = memo(function BrandIconManager() {
       return;
     }
 
+    // Validate file size (2MB max for icons) and type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload a PNG, JPEG, or SVG image.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image too large. Maximum size for icons is 2MB.');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const image = event.target?.result as string;
@@ -47,6 +58,9 @@ export const BrandIconManager = memo(function BrandIconManager() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    };
+    reader.onerror = () => {
+      console.error('Failed to read brand icon file');
     };
     reader.readAsDataURL(file);
   };

@@ -1,6 +1,15 @@
 import JsBarcode from 'jsbarcode';
 import { logger } from './logger';
 
+// Barcode validation constants
+/** Maximum number of characters allowed in a barcode value */
+export const BARCODE_MAX_LENGTH = 80;
+/** Default barcode format used when none is specified */
+export const BARCODE_DEFAULT_FORMAT = 'CODE128';
+/** Regex pattern for valid barcode characters (ASCII range 0x00-0x7F) */
+// eslint-disable-next-line no-control-regex
+export const BARCODE_ASCII_PATTERN = /^[\x00-\x7F]+$/;
+
 /**
  * Generate barcode as data URL
  */
@@ -21,7 +30,7 @@ export function generateBarcodeDataUrl(
   try {
     const canvas = document.createElement('canvas');
     JsBarcode(canvas, text, {
-      format: options?.format || 'CODE128',
+      format: options?.format || BARCODE_DEFAULT_FORMAT,
       width: options?.width || 2,
       height: options?.height || 50,
       displayValue: options?.displayValue ?? true,
@@ -30,7 +39,7 @@ export function generateBarcodeDataUrl(
     });
     logger.debug('Barcode', 'Successfully generated barcode', {
       text,
-      format: options?.format || 'CODE128',
+      format: options?.format || BARCODE_DEFAULT_FORMAT,
     });
     return canvas.toDataURL('image/png');
   } catch (err) {
@@ -44,8 +53,7 @@ export function generateBarcodeDataUrl(
  */
 export function isValidBarcode(text: string): boolean {
   // CODE128 accepts most ASCII characters (0x00-0x7F range)
-  // eslint-disable-next-line no-control-regex
-  const isValid = text.length > 0 && text.length <= 80 && /^[\x00-\x7F]+$/.test(text);
+  const isValid = text.length > 0 && text.length <= BARCODE_MAX_LENGTH && BARCODE_ASCII_PATTERN.test(text);
   if (!isValid && text.length > 0) {
     logger.debug('Barcode', 'Invalid barcode text', { text, length: text.length });
   }

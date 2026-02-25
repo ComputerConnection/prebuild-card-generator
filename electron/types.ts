@@ -66,8 +66,7 @@ export interface PrinterInfo {
   name: string;
   displayName: string;
   description: string;
-  isDefault: boolean;
-  status: number;
+  options?: Record<string, string>;
 }
 
 export interface PrintOptions {
@@ -183,9 +182,4 @@ export interface ElectronAPI {
   app: AppAPI;
 }
 
-// Augment the Window interface for TypeScript
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
-  }
-}
+// Note: Window augmentation for the renderer is in src/vite-env.d.ts

@@ -27,7 +27,7 @@
       "@types/*": ["src/types/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "electron/types.ts"],
   "exclude": ["src/test/**/*", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

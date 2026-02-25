@@ -121,7 +121,7 @@ export function createApplicationMenu(): void {
         { type: 'separator' },
         {
           label: 'Print Queue',
-          accelerator: 'CmdOrCtrl+Q',
+          accelerator: 'CmdOrCtrl+Shift+Q',
           click: () => sendToRenderer('menu:printQueue'),
         },
         {

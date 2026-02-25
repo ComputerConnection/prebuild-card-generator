@@ -1,17 +1,22 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, shell } from 'electron';
 import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import type { PrintOptions, PrinterInfo } from '../types';
+import type { PrintOptions } from '../types';
 
 export function registerPrintHandlers(): void {
   // ── Get available printers ───────────────────────────────
-  ipcMain.handle('print:getPrinters', () => {
+  ipcMain.handle('print:getPrinters', async () => {
     const window = BrowserWindow.getFocusedWindow();
     if (!window) return [];
 
-    const printers = window.webContents.getPrintersAsync();
-    return printers;
+    const printers = await window.webContents.getPrintersAsync();
+    return printers.map((p) => ({
+      name: p.name,
+      displayName: p.displayName,
+      description: p.description,
+      options: p.options,
+    }));
   });
 
   // ── Get default printer ──────────────────────────────────
@@ -19,9 +24,10 @@ export function registerPrintHandlers(): void {
     const window = BrowserWindow.getFocusedWindow();
     if (!window) return null;
 
-    const printers = (await window.webContents.getPrintersAsync()) as PrinterInfo[];
-    const defaultPrinter = printers.find((p) => p.isDefault);
-    return defaultPrinter?.name || null;
+    const printers = await window.webContents.getPrintersAsync();
+    // Electron doesn't expose a dedicated isDefault flag;
+    // the first printer returned is typically the system default.
+    return printers[0]?.name || null;
   });
 
   // ── Print PDF ────────────────────────────────────────────
@@ -84,7 +90,6 @@ export function registerPrintHandlers(): void {
       const tempPath = join(tmpdir(), `prebuild-preview-${Date.now()}.pdf`);
       await writeFile(tempPath, Buffer.from(pdfBytes));
 
-      const { shell } = require('electron');
       await shell.openPath(tempPath);
 
       // Schedule temp file cleanup after 60 seconds

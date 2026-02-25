@@ -8,8 +8,13 @@ import { registerUpdateHandlers, initAutoUpdater } from './ipc/updateHandlers';
 import { createApplicationMenu } from './menu';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
-  app.quit();
+// electron-squirrel-startup is only present when using Squirrel installer.
+try {
+  if (require('electron-squirrel-startup')) {
+    app.quit();
+  }
+} catch {
+  // Not using Squirrel installer — no action needed
 }
 
 let mainWindow: BrowserWindow | null = null;
